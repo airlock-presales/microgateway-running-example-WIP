@@ -15,7 +15,7 @@
 - Requests routed through **Traefik Ingress**
 - Services protected via **Airlock Microgateway Gateway API**
 - Observability stack (Prometheus, Grafana, Loki)
-- Auth via **Microsoft Entra ID (Azure AD)**
+- Authentication via **Microsoft Entra ID (Azure AD)**
 
 ---
 
@@ -24,7 +24,7 @@
 | Path | Description |
 |------|-------------|
 | `/` | Public |
-| `/user` | Auth required (Microsoft tenant) |
+| `/user` | User role required (Microsoft tenant) |
 | `/admin` | Admin role required (Microsoft tenant) |
 
 - webserver Base URL: https://webserver-127-0-0-1.nip.io:8081/
