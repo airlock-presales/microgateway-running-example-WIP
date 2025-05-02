@@ -98,10 +98,11 @@ Sidecarless Base URL: https://webserver-127-0-0-1.nip.io:8081/
 | /user  | Authentication required                                                |
 
 ## ⚠️ Important Notes
+- Make sure the user is part of a security group and the Entra Application emits the group ID in a token
 - The limit of Groups in a Token is limited to 200 via OIDC my Microsoft.
-- In larger Organisations it can easiely happen that a user may reach this limit.
-- To avoid it the Administrator should assign the Application the relevant Group memberships and then just activate just
-- Groups assigned to the application (recommended for large enterprise companies to avoid exceeding the limit on the number of groups a token can emit)
+- In larger Organisations it can easily happen that a user may reach this limit.
+- To avoid it the Administrator should assign the Application relevant Group memberships and add users to that group. (recommended for large enterprise companies to avoid exceeding the limit on the number of groups a token can emit)
+
 
 ---
 
