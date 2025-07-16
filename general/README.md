@@ -45,9 +45,7 @@ Make sure the following tools are installed:
 ```bash
 kubectl create ns airlock-microgateway-system --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl -n airlock-microgateway-system create secret generic airlock-microgateway-license \
-  --from-file=microgateway-license.txt \
-  --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n airlock-microgateway-system create secret generic airlock-microgateway-license --from-file=microgateway-license.txt --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ## 📜 Deploy Cert-Manager
