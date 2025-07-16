@@ -1,87 +1,79 @@
-# 🛡️ Airlock Microgateway Web Protection Example
+# ⚙️ Airlock Microgateway General Setup
 
 <p align="left">
   <img src="https://raw.githubusercontent.com/airlock/microgateway/main/media/Microgateway_Labeled_AlignRight.svg" alt="Microgateway Logo" width="250">
 </p>
 
-This example demonstrates how to secure web applications in Kubernetes using Airlock Microgateway.
+This guide provides the foundational setup required for running Airlock Microgateway examples within a Kubernetes environment such as Rancher Desktop. It includes all general steps like licensing, infrastructure setup, logging, monitoring, and installing the Microgateway.
 
 ---
 
-## 🖼 Architecture Overview
+## 🖼️ Architecture Overview
 
-![Topology Diagram](media/topology.svg)
-
-**Key Components:**
-- **Ingress Controller (Traefik)** for routing
-- **Airlock Microgateway**:
-  - Sidecar data plane mode for Nextcloud
-  - Sidecarless data plane mode (Gateway API) for Juice Shop
-- **Prometheus + Grafana** for metrics
-- **Loki + Promtail** for logging
+**Core Components:**
+- **Ingress Controller (e.g. Traefik)** – Routing and traffic management
+- **Airlock Microgateway** – Data plane security
+- **Prometheus & Grafana** – Metrics and dashboards
+- **Loki & Promtail** – Log aggregation and analysis
 
 ---
 
-## 🌐 Application Access
+## 🧰 Prerequisites
 
-| Application | URL |
-|------------|-----|
-| Grafana | [http://grafana-127-0-0-1.nip.io/](http://grafana-127-0-0-1.nip.io/) |
-| Prometheus | [http://prometheus-127-0-0-1.nip.io/](http://prometheus-127-0-0-1.nip.io/) |
+> ⚠️ This setup is optimized for **Rancher Desktop** with `containerd`. You can adapt it to other Kubernetes distributions.
+
+### Required Tools
+Make sure the following tools are installed:
+- [`kubectl`](https://kubernetes.io/docs/reference/kubectl/overview/)
+- [`helm`](https://helm.sh/docs/intro/install/)
+- [`kustomize`](https://kustomize.io) (version ≥ 5.2.1)
+- A running **Kubernetes cluster** with an **Ingress Controller** (e.g. Traefik, Ingress NGINX)
+
+### Airlock Microgateway Requirements
+- Review and fulfill all [Airlock Microgateway prerequisites](https://docs.airlock.com/microgateway/latest/#data/1660804711882.html)
 
 ---
 
-## ⚙️ Setup
+## 🛡️ Install License
 
+ 📝 You must obtain a valid license before continuing:
+ - **Community License**: [airlock.com/microgateway-community](https://airlock.com/en/microgateway-community)
+ - **Premium License**: [airlock.com/microgateway-premium](https://airlock.com/en/microgateway-premium)
+ - 📘 [Community vs. Premium Comparison](https://docs.airlock.com/microgateway/latest/#data/1675772882054.html)
 
-> [!WARNING]
-> Be aware that this is an example and some security settings are disabled to make this demo as simple as possible (e.g. authentication enforcement, restrictive deny rule configuration and other security settings).
-
-## General prerequisites
-* Install [Rancher Desktop](https://docs.rancherdesktop.io/getting-started/installation/).
-
-> [!NOTE]
-> This example is built for Rancher Desktop with containerd as container engine. Nevertheless, it should also work with any other Kubernetes distributions. Simply ensure the following:
-> * Ensure the [Airlock Microgateway requirements](https://docs.airlock.com/microgateway/latest/#data/1660804711882.html) are met.
-> * [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) is installed.
-> * [helm](https://helm.sh/docs/intro/install/) is installed.
-> * [kustomize](https://kustomize.io) >= 5.2.1 is installed.
-> * An Ingress Controller (e.g. Traefik, Ingress Nginx, ...) is deployed.
-
-## 🛠 Deployment Steps
-
-### Obtain and deploy the Airlock Microgateway license
-1. Either request a community license free of charge or purchase a premium license.
-   * Community license: [airlock.com/microgateway-community](https://airlock.com/en/microgateway-community)
-   * Premium license: [airlock.com/microgateway-premium](https://airlock.com/en/microgateway-premium)
-2. Check your mailbox and save the license file `microgateway-license.txt` locally (replace any existing file).
-3. Deploy the Airlock Microgateway license
+### Deploy the License
 ```bash
-# Create the airlock-microgateway-system namespace
 kubectl create ns airlock-microgateway-system --dry-run=client -o yaml | kubectl apply -f -
 
-# Deploy the Airlock Microgateway license
-kubectl -n airlock-microgateway-system create secret generic airlock-microgateway-license --from-file=microgateway-license.txt --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n airlock-microgateway-system create secret generic airlock-microgateway-license \
+  --from-file=microgateway-license.txt \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-> [!NOTE]
-> See [Community vs. Premium editions in detail](https://docs.airlock.com/microgateway/latest/#data/1675772882054.html) to choose the right license type.
-
-## Deploy the needed components
-
-### Deploy the cert-manager
+## 📜 Deploy Cert-Manager
 For an easy start in non-production environments, you may deploy the same [cert-manager](https://cert-manager.io/) we are using internally for testing.
 ```bash
-# Deploy the cert-manager
 kubectl kustomize --enable-helm manifests/cert-manager | kubectl apply --server-side -f -
 
 # Wait until the cert-manager is up and running
 kubectl -n cert-manager rollout status deployment
 ```
 
-### Deploy the logging, monitoring and reporting  stack
+## 📜 Deploy Certificate Authority (CA)
 ```bash
-# Deploy Promtail, Loki, Prometheus and Grafana
+kubectl kustomize --enable-helm manifests/ca | kubectl apply --server-side -f -
+```
+
+## 🗄️ Deploy Redis (Session Store)
+```bash
+kubectl kustomize --enable-helm manifests/redis-sessionstore | kubectl apply --server-side -f -
+
+# Wait until the Redis is up and running
+kubectl -n redis rollout status deployment
+```
+
+## 📊 Deploy Logging and Monitoring Stack
+```bash
 kubectl kustomize --enable-helm manifests/logging-and-reporting | kubectl apply --server-side -f -
 
 # Wait until Promtail, Loki, Prometheus and Grafana are up and running
@@ -93,17 +85,7 @@ kubectl -n monitoring rollout status deployment,daemonset,statefulset
 > * Prometheus via http://prometheus-127-0-0-1.nip.io/
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 
-## Deploy CA
-```bash
-kubectl kustomize --enable-helm manifests/ca | kubectl apply --server-side -f -
-```
-
-## Deploy Redis (Sessionstore)
-```bash
-kubectl kustomize --enable-helm manifests/redis-sessionstore | kubectl apply --server-side -f -
-```
-
-### Deploy Airlock Microgateway
+## 🚀 Deploy Airlock Microgateway
 > [!TIP]
 > Certain environments such as OpenShift or GKE require non-default configurations when installing the CNI plugin. In case that the CNI plugin does not start properly consult [Troubleshooting Microgateway CNI](https://docs.airlock.com/microgateway/latest/#data/1710781909882.html).
 

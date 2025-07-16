@@ -37,8 +37,10 @@ Extend your secure deployment by integrating **authentication and authorization*
 > [!WARNING]
 > Be aware that this is an example and some security settings are disabled to make this demo as simple as possible (e.g. authentication enforcement, restrictive deny rule configuration and other security settings).
 
-## General prerequisites
-* Please follow the instructions described [here](../general/)
+## 🧰 General Prerequisites
+
+Before continuing, make sure your environment is prepared by following the instructions in the [General Setup](../general).  
+This includes installing required tools, deploying observability components, certificate authorities, Redis, and the Airlock Microgateway itself.
 
 ## Entra ID Prerequisites
 

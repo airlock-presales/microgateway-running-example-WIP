@@ -37,15 +37,13 @@ This example demonstrates how to secure web applications in Kubernetes using Air
 > [!WARNING]
 > Be aware that this is an example and some security settings are disabled to make this demo as simple as possible (e.g. authentication enforcement, restrictive deny rule configuration and other security settings).
 
-## General prerequisites
-* Please follow the instructions described [here](../general/)
+## 🧰 General Prerequisites
 
-## 🛠 Deployment Steps
-
-Please make sure that you followed the [general setup](../general/) instructions and the enviroment is ready.
+Before continuing, make sure your environment is prepared by following the instructions in the [General Setup](../general).  
+This includes installing required tools, deploying observability components, certificate authorities, Redis, and the Airlock Microgateway itself.
 
 
-## Deploy the examples:
+## 🛠 Deploy the examples:
 
 ### Deploy Nextcloud
 
