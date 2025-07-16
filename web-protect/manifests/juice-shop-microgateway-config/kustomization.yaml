@@ -5,8 +5,8 @@ kind: Kustomization
 resources:
 - contentsecuritypolicy.yaml
 - denyrule.yaml
-- gateway.yaml
-- gatewayparameters.yaml
+#- gateway.yaml
+#- gatewayparameters.yaml
 - headerrewrites.yaml
 - httproute.yaml
 - namespace.yaml

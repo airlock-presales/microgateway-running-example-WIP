@@ -33,25 +33,12 @@ Extend your secure deployment by integrating **authentication and authorization*
 ---
 
 ## ⚙️ Setup
-* Install [Rancher Desktop](https://docs.rancherdesktop.io/getting-started/installation/).
 
-> [!NOTE]
-> This example is built for Rancher Desktop with containerd as container engine. Nevertheless, it should also work with any other Kubernetes distributions. Simply ensure the following:
-> * Ensure the [Airlock Microgateway requirements](https://docs.airlock.com/microgateway/latest/#data/1660804711882.html) are met.
-> * [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) is installed.
-> * [helm](https://helm.sh/docs/intro/install/) is installed.
-> * [kustomize](https://kustomize.io) >= 5.2.1 is installed.
-> * An Ingress Controller (e.g. Traefik, Ingress Nginx, ...) is deployed.
+> [!WARNING]
+> Be aware that this is an example and some security settings are disabled to make this demo as simple as possible (e.g. authentication enforcement, restrictive deny rule configuration and other security settings).
 
-## Airlock OIDC Microgateway prerequisites
-
-This example is implemented on top of the base demo, [web protection](../web-protect). Please ensure you have it already set up correctly.
-
-**If any of the prerequisites is missing, please install it according to the [web protection](../web-protect) example**
-
-> * Microgateway with valid license and experimental Gateway API CRDs is deployed 
-> * cert-manager is deployed
-> * logging, monitoring and reporting stack is deployed
+## General prerequisites
+* Please follow the instructions described [here](../general/)
 
 ## Entra ID Prerequisites
 
@@ -139,16 +126,6 @@ To assist you, here are the key steps in image form. Click the thumbnails for a 
 ## 🛠 Deployment Steps
 > [!WARNING]
 > Be aware that this is an example and some security settings are disabled to make this demo as simple as possible (e.g. authentication enforcement, restrictive deny rule configuration and other security settings).
-
-## Deploy CA
-```bash
-kubectl kustomize --enable-helm manifests/ca | kubectl apply --server-side -f -
-```
-
-## Deploy Redis
-```bash
-kubectl kustomize --enable-helm manifests/redis-sessionstore | kubectl apply --server-side -f -
-```
 
 ## Deploy Webserver
 ```bash
