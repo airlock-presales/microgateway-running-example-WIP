@@ -14,14 +14,12 @@ spec:
   listeners:
   - name: http
     port: 8080
-    #hostname: "juice-shop-127-0-0-1.nip.io"
     protocol: HTTP
     allowedRoutes:
       namespaces:
         from: All
   - name: https
     port: 8081
-    #hostname: "webserver-127-0-0-1.nip.io"
     protocol: HTTPS
     tls:
       mode: Terminate

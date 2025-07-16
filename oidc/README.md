@@ -131,8 +131,16 @@ To assist you, here are the key steps in image form. Click the thumbnails for a 
 
 ## Deploy Webserver
 ```bash
-kubectl kustomize --enable-helm manifests | kubectl apply --server-side -f -
+kubectl kustomize --enable-helm manifests/webserver | kubectl apply --server-side -f -
+
+# Wait until Webserver is up and running
 kubectl -n oidc rollout status deployment webserver
+```
+
+## Protect Webserver (data plane mode 'sidecarless')
+```bash
+# Deploy the Airlock Microgateway configuration
+kubectl kustomize --enable-helm manifests/webserver-microgateway-config | kubectl apply --server-side -f -
 ```
 
  > [!WARNING] 
