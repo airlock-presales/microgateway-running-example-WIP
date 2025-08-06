@@ -337,26 +337,12 @@ spec:
 ```
 </details>
 
-## 🚀 Deploy Airlock Microgateway
-> [!TIP]
-> Certain environments such as OpenShift or GKE require non-default configurations when installing the CNI plugin. In case that the CNI plugin does not start properly consult [Troubleshooting Microgateway CNI](https://docs.airlock.com/microgateway/latest/#data/1710781909882.html).
-
-> [!NOTE]
-> In case this example is not deployed in Rancher Desktop, most likely the `cniBinDir`and `cniNetDir`in the file `manifests/airlock-microgateway/microgateway-cni-values.yaml` must be adjusted.
-> Example:
-> ```
-> config:
->   cniBinDir: "/usr/libexec/cni/"
->   cniNetDir: "/etc/cni/net.d"
-> ```
+## 🚀 Install Airlock Microgateway via OperatorHub
 
 ```bash
-# Deploy Airlock Microgateway including the CNI plugin
+# Setup Airlock Microgateway after it was installed via OperatorHub
 oc kustomize --enable-helm manifests/airlock-microgateway | oc apply -f -
 
-# Wait until Airlock Microgateway is up and running
-oc -n kube-system rollout status daemonset airlock-microgateway-microgateway-cni
-oc -n airlock-microgateway-system rollout status deployment
 
 Activate the Podmonitor, by editing the subscription of the Airlock operator:
 spec:
