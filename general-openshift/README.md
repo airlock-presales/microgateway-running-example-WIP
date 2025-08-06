@@ -1,10 +1,10 @@
-# ⚙️ Airlock Microgateway General Setup
+# ⚙️ Airlock Microgateway General OpenShift Setup
 
 <p align="left">
   <img src="https://raw.githubusercontent.com/airlock/microgateway/main/media/Microgateway_Labeled_AlignRight.svg" alt="Microgateway Logo" width="250">
 </p>
 
-This guide provides the foundational setup required for running Airlock Microgateway examples within a Kubernetes environment such as Rancher Desktop. It includes all general steps like licensing, infrastructure setup, logging, monitoring, and installing the Microgateway.
+This guide provides the foundational setup required for running Airlock Microgateway examples within the Red Hat OpenShift environment. It includes all general steps like licensing, infrastructure setup, logging, monitoring, and installing the Microgateway.
 
 ---
 
@@ -15,7 +15,7 @@ This guide provides the foundational setup required for running Airlock Microgat
 - **Airlock Microgateway** – Data plane security
 - **Prometheus & Grafana** – Metrics and dashboards
 - **Loki & Grafana-Agent** – Log aggregation and analysis
-- **Loki Stack & Red Hat Logging** - Log aggregation and analysis ***Red Hat Supported**
+- **LokiStack & Red Hat Cluster Logging** - Log aggregation and analysis ***Red Hat Supported**
 
 ---
 
@@ -83,7 +83,7 @@ oc kustomize --enable-helm manifests/logging-and-reporting/grafana | oc apply --
 > * Prometheus via http://prometheus-127-0-0-1.nip.io/
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 
-## Install Loki communiti edition via Operator Hub
+### Install Loki communiti edition via Operator Hub
 Open Loki via installed Operator and apply the following config.
 
 <details>
@@ -142,7 +142,7 @@ kubectl kustomize --enable-helm manifests/logging-and-reporting/loki-community |
 
 </details>
 
-## Install grafana-agent
+### Install grafana-agent
 ```bash
 kubectl kustomize --enable-helm manifests/logging-and-reporting/grafana-agent/ | kubectl apply --server-side -f -
 
@@ -152,7 +152,7 @@ oc adm policy add-scc-to-user privileged -z alloy-agent -n monitoring
 <details>
 <summary>Install minIO (Optional)</summary>
 
-## Install minIO if you have no valid storage for Loki-Stack
+### Install minIO if you have no valid storage for Loki-Stack
 
 > [!WARNING]  
 > Please be aware of the minIO license which is maybe needed
@@ -245,7 +245,7 @@ spec:
 <details>
 <summary>RedHat OpenShift Logging Operator (under construction)</summary>
 
-## Install Red Hat OpenShift Logging Operator via OperatorHub *Untested
+### Install Red Hat OpenShift Logging Operator via OperatorHub *Untested
 
 > [!WARNING]  
 > Does not work without public signed certificate used in Loki Stack until skip TLS verify for Loki Stack or [RFE-2723](https://issues.redhat.com/browse/RFE-2723) is implemented
@@ -273,15 +273,7 @@ oc adm policy add-cluster-role-to-user collect-infrastructure-logs system:servic
 oc adm policy add-cluster-role-to-user collect-audit-logs system:serviceaccount:openshift-logging:collector
 
 
-### Patch the CA issue for Loki, as the CA is not trusted
-```bash
-oc get secret logging-loki-signing-ca -n openshift-logging -o jsonpath='{.data.tls\.crt}' | base64 -d > loki-ca.crt
-oc create secret generic my-loki-ca --from-file=ca-bundle.crt=loki-ca.crt -n openshift-logging
-#oc annotate configmap loki-trusted-ca -n openshift-logging config.openshift.io/inject-trusted-cabundle="true" --overwrite
-```
-
-
-Step-by-Step to Create a ClusterLogForwarder
+#### Step-by-Step to Create a ClusterLogForwarder
 1. In the OpenShift Web Console:
 Go to Operators > Installed Operators
 
