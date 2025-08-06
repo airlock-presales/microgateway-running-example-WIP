@@ -340,7 +340,7 @@ spec:
 ## 🚀 Install Airlock Microgateway via OperatorHub
 
 ```bash
-# Setup Airlock Microgateway after it was installed via OperatorHub
+# Configure the Airlock Microgateway after it was installed via OperatorHub
 oc kustomize --enable-helm manifests/airlock-microgateway | oc apply -f -
 
 
