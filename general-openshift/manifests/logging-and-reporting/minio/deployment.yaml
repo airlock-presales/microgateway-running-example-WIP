@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: minio
+  labels:
+    app: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: minio
+        image: minio/minio:RELEASE.2025-07-23T15-54-02Z
+        command: [ "minio", "server", "/data" ]
+        ports:
+        - containerPort: 9000
+          name: api
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: MINIO_ACCESS_KEY
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: MINIO_SECRET_KEY
+        - name: MINIO_BROWSER
+          valueFrom:
+            configMapKeyRef:
+              name: minio-config
+              key: MINIO_BROWSER
+        - name: MINIO_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: minio-config
+              key: MINIO_DOMAIN
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: 9000
+          initialDelaySeconds: 10
+          periodSeconds: 20
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: 9000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: config
+          mountPath: /root/.minio
+        lifecycle:
+          preStop:
+            exec:
+              command: [ "/bin/sh", "-c", "sleep 5" ]
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ "ALL" ]
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: config
+        emptyDir: {}
