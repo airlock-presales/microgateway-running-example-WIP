@@ -154,7 +154,7 @@ oc adm policy add-scc-to-user privileged -z alloy-agent -n monitoring
 
 ### Install minIO if you have no valid storage for Loki-Stack
 
-> [!WARNING]  
+> [!WARNING] 
 > Please be aware of the minIO license which is maybe needed
 
 ```bash
@@ -247,7 +247,7 @@ spec:
 
 ### Install Red Hat OpenShift Logging Operator via OperatorHub *Untested
 
-> [!WARNING]  
+> [!WARNING] 
 > Does not work without public signed certificate used in Loki Stack until skip TLS verify for Loki Stack or [RFE-2723](https://issues.redhat.com/browse/RFE-2723) is implemented
 
 
