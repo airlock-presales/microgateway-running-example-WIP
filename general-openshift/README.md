@@ -39,7 +39,7 @@ oc -n airlock-microgateway-system create secret generic airlock-microgateway-lic
 ```
 
 ## 🗃️ Deploy Cert-Manager Operator for Red Hat OpenShift via OperatorHub
-Choose namespace **cert-manager** during install.
+Keep the recommended namespace **cert-manager-operator** during install.
 
 ## 🗄️📜 Deploy Certificate Authority (CA)
 ```bash
@@ -80,10 +80,9 @@ oc kustomize --enable-helm manifests/logging-and-reporting/grafana | oc apply --
 
 > [!NOTE]
 > You can now access
-> * Prometheus via http://prometheus-127-0-0-1.nip.io/
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 
-### Install Loki communiti edition via Operator Hub
+### Install Loki communiti edition via Operator Hub (from opdev) in namespace monitoring
 Open Loki via installed Operator and apply the following config.
 
 <details>
@@ -339,8 +338,23 @@ spec:
 
 ## 🚀 Install Airlock Microgateway via OperatorHub
 
+> ⚠️ Warning
+> Starting in OpenShift Container Platform 4.19, the Ingress Operator manages the lifecycle of any Gateway API custom resource definitions (CRDs). This means that you will be denied access to creating, updating, and deleting any CRDs within the API groups that are grouped under Gateway API.
+
+If you have an OpenShift version <= 4.18 please uncomment the installation of the GatewayAPI CRDs or install it manually.
+
+<details>
+<summary>Install GatewayAPI manual CRD installation</summary>
+
 ```bash
-# Configure the Airlock Microgateway after it was installed via OperatorHub
+oc apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+oc apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml # For backendTLS support e.g. OIDC example
+```
+
+</details>
+
+### Airlock Microgateway configure the after it was installed via OperatorHub
+```bash
 oc kustomize --enable-helm manifests/airlock-microgateway | oc apply -f -
 
 
