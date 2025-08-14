@@ -68,30 +68,14 @@ oc -n monitoring rollout status deployment
 oc adm policy add-cluster-role-to-user cluster-monitoring-view \
   -z grafana \
   -n monitoring
+```
+
+### Replace the example token with your own Token  in the Grafana values.yaml and reapply Grafana
+```bash
 oc create token grafana -n monitoring --duration=87600h > grafana-token.txt #valid for 10 years
 
 cat grafana-token.txt 
-```
 
-### Create the binding to access Lokistack
-
-```bash
-oc adm policy add-cluster-role-to-user logging-loki-gateway-application-reader \
-  -z grafana -n monitoring
-oc adm policy add-cluster-role-to-user logging-loki-gateway-infrastructure-reader \
-  -z grafana -n monitoring
-oc adm policy add-cluster-role-to-user logging-loki-gateway-audit-reader \
-  -z grafana -n monitoring
-oc adm policy add-cluster-role-to-user \
-  logging-loki-gateway-application-reader \
-  -z grafana -n monitoring
-oc adm policy add-cluster-role-to-user \
-  cluster-reader \
-  -z grafana -n monitoring
-```
-
-### Replace the wrong token with your own Token and reapply Grafana
-```bash
 oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/grafana | oc apply --server-side -f -
 ```
 
@@ -101,6 +85,11 @@ oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/gra
 
 ### Install Loki communiti edition via Operator Hub (from opdev) in namespace monitoring
 Open Loki via installed Operator and apply the following config.
+
+Apply RBAC to grant Loki access:
+```bash
+kubectl kustomize --enable-helm general-openshift/manifests/logging-and-reporting/loki-community | kubectl apply --server-side -f -
+```
 
 <details>
 <summary>Loki Community config</summary>
@@ -151,18 +140,13 @@ spec:
     enabled: false
 ```
 
-Apply also the RBAC to grant Loki access:
-```bash
-kubectl kustomize --enable-helm general-openshift/manifests/logging-and-reporting/loki-community | kubectl apply --server-side -f -
-```
-
 </details>
 
 ### Install Alloy
 ```bash
 kubectl kustomize --enable-helm general-openshift/manifests/logging-and-reporting/alloy/ | kubectl apply --server-side -f -
 
-#oc adm policy add-scc-to-user privileged -z alloy -n monitoring
+oc adm policy add-scc-to-user privileged -z alloy -n monitoring
 ```
 
 <details>
@@ -199,6 +183,15 @@ oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/lok
 oc adm policy add-cluster-role-to-user logging-loki-gateway-application-reader \
   -z grafana -n monitoring
 
+```
+
+### Create the binding to access Lokistack
+
+```bash
+oc adm policy add-cluster-role-to-user logging-loki-gateway-application-reader -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user logging-loki-gateway-infrastructure-reader -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user logging-loki-gateway-audit-reader -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user cluster-reader -z grafana -n monitoring #testing just with this one
 ```
 
 Step-by-Step to Create a LokiStack
@@ -369,7 +362,7 @@ spec:
 If you have an OpenShift version <= 4.18 please install the GatewayAPI CRDs manually.
 
 ```bash
-# Please install experimental for backendTLS support e.g. OIDC example
+# Please install experimental for backendTLS support needed for the OIDC example.
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml 
 
 # Standard version with no experimental features. OIDC example will not work with it or needs to be manually adjusted.

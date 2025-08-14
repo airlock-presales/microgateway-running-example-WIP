@@ -12,5 +12,5 @@ helmCharts:
   releaseName: redis
   namespace: redis
   repo: oci://registry-1.docker.io/bitnamicharts
-  version: latest # 21.2.13 changed due to the latest bitnami changes
+  version: 21.2.13 #changed soon to latest due to the latest bitnami changes
   valuesFile: values.yaml
