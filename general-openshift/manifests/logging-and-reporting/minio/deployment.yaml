@@ -23,10 +23,12 @@ spec:
       containers:
       - name: minio
         image: minio/minio:RELEASE.2025-07-23T15-54-02Z
-        command: [ "minio", "server", "/data" ]
+        command: [ "minio", "server", "/data", "--console-address", ":9001" ]
         ports:
         - containerPort: 9000
           name: api
+        - containerPort: 9001
+          name: console
         env:
         - name: MINIO_ACCESS_KEY
           valueFrom:

@@ -3,8 +3,8 @@ kind: Kustomization
 namespace: monitoring
 
 helmCharts:
-- name: grafana-agent
+- name: alloy
   repo: https://grafana.github.io/helm-charts
-  version: 0.42.0
-  releaseName: grafana-agent
+  version: 0.6.0 # or the latest Alloy version
+  releaseName: alloy
   valuesFile: values.yaml

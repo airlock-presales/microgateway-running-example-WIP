@@ -14,7 +14,7 @@ This guide provides the foundational setup required for running Airlock Microgat
 **Core Components:**
 - **Airlock Microgateway** – Data plane security
 - **Prometheus & Grafana** – Metrics and dashboards
-- **Loki & Grafana-Agent** – Log aggregation and analysis
+- **Loki & Alloy** – Log aggregation and analysis
 - **LokiStack & Red Hat Cluster Logging** - Log aggregation and analysis ***Red Hat Supported**
 
 ---
@@ -43,12 +43,12 @@ Keep the recommended namespace **cert-manager-operator** during install.
 
 ## 🗄️📜 Deploy Certificate Authority (CA)
 ```bash
-oc kustomize --enable-helm manifests/ca | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/ca | oc apply --server-side -f -
 ```
 
 ## 🔐 Deploy Redis (Session Store)
 ```bash
-oc kustomize --enable-helm manifests/redis-sessionstore | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/redis-sessionstore | oc apply --server-side -f -
 
 # Wait until the Redis is up and running
 oc -n redis rollout status deployment
@@ -57,7 +57,7 @@ oc -n redis rollout status deployment
 ## 📊 Deploy Logging and Monitoring Stack
 
 ```bash
-oc kustomize --enable-helm manifests/logging-and-reporting | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting | oc apply --server-side -f -
 
 # Wait until Grafana is up and running
 oc -n monitoring rollout status deployment
@@ -73,9 +73,26 @@ oc create token grafana -n monitoring --duration=87600h > grafana-token.txt #val
 cat grafana-token.txt 
 ```
 
+### Create the binding to access Lokistack
+
+```bash
+oc adm policy add-cluster-role-to-user logging-loki-gateway-application-reader \
+  -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user logging-loki-gateway-infrastructure-reader \
+  -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user logging-loki-gateway-audit-reader \
+  -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user \
+  logging-loki-gateway-application-reader \
+  -z grafana -n monitoring
+oc adm policy add-cluster-role-to-user \
+  cluster-reader \
+  -z grafana -n monitoring
+```
+
 ### Replace the wrong token with your own Token and reapply Grafana
 ```bash
-oc kustomize --enable-helm manifests/logging-and-reporting/grafana | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/grafana | oc apply --server-side -f -
 ```
 
 > [!NOTE]
@@ -136,16 +153,16 @@ spec:
 
 Apply also the RBAC to grant Loki access:
 ```bash
-kubectl kustomize --enable-helm manifests/logging-and-reporting/loki-community | kubectl apply --server-side -f -
+kubectl kustomize --enable-helm general-openshift/manifests/logging-and-reporting/loki-community | kubectl apply --server-side -f -
 ```
 
 </details>
 
-### Install grafana-agent
+### Install Alloy
 ```bash
-kubectl kustomize --enable-helm manifests/logging-and-reporting/grafana-agent/ | kubectl apply --server-side -f -
+kubectl kustomize --enable-helm general-openshift/manifests/logging-and-reporting/alloy/ | kubectl apply --server-side -f -
 
-oc adm policy add-scc-to-user privileged -z alloy-agent -n monitoring
+#oc adm policy add-scc-to-user privileged -z alloy -n monitoring
 ```
 
 <details>
@@ -156,16 +173,16 @@ oc adm policy add-scc-to-user privileged -z alloy-agent -n monitoring
 > ⚠️ Please be aware of the minIO license which is maybe needed
 
 ```bash
-oc kustomize --enable-helm manifests/logging-and-reporting/minio | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/minio | oc apply --server-side -f -
 ```
 Now create the bucket for Loki called loki
 You can do it via minIO CLI (MC) of using the GUI of minIO which is active in this example, but not recommended.
 Activate Port Forwading to gain access
 ```bash
-oc -n minio port-forward svc/minio 9000:9000
+oc -n minio port-forward svc/minio 9001:9001
 ```
-Now you can access minIO GUI via your browser Open http://s3.airlock.local:9000 (make sure you have an valid DNS record)
-Default user and password is minioadmin/minioadmin
+Now you can access minIO GUI via your browser Open http://s3.airlock.local:9001 (make sure you have an valid DNS record)
+User and password is MINIO_ACCESS_KEY/MINIO_SECRET_KEY
 </details>
 
 <details>
@@ -177,20 +194,12 @@ Keep the recommended default openshift-operators-redhat
 
 In to be able to use LokiStack, we first have to create a secret for Loki to access minIO
 ```bash
-oc kustomize --enable-helm manifests/logging-and-reporting/loki | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/lokistack | oc apply --server-side -f -
+
+oc adm policy add-cluster-role-to-user logging-loki-gateway-application-reader \
+  -z grafana -n monitoring
+
 ```
-
-### Create a token a for communication:
-echo -n "supersecretlokitoken" > token
-oc create secret generic my-loki-token \
-  --from-file=token=token \
-  -n openshift-logging
-
-### Create Tenant Mapping Secret for Loki Gateway
-```bash
-oc apply -f manifests/logging-and-reporting/loki/loki-gateway-tenants-secret.yaml
-```
-
 
 Step-by-Step to Create a LokiStack
 1. In the OpenShift Web Console:
@@ -212,29 +221,41 @@ apiVersion: loki.grafana.com/v1
 kind: LokiStack
 metadata:
   name: logging-loki
-  namespace: openshift-logging
-  annotations:
-    loki.grafana.com/gateway-tenant-secret-name: loki-gateway-tenants
+  namespace: monitoring
 spec:
+  size: 1x.demo
   tenants:
-    mode: static
-  managementState: Managed
-  limits:
-    global:
-      queries:
-        queryTimeout: 3m
+    mode: openshift-logging
+  storageClassName: crc-csi-hostpath-provisioner
   storage:
     schemas:
-      - effectiveDate: '2025-07-30'
-        version: v13
-    secret:eval $(crc oc-env)
-      name: minio-loki-secret
+      - version: v13
+        effectiveDate: "2024-01-01"
+    secret:
+      name: loki-s3
       type: s3
-      credentialMode: static
-  hashRing:
-    type: memberlist
-  size: 1x.demo
-  storageClassName: crc-csi-hostpath-provisioner
+
+  # Optional: global limits—keep minimal for demo; tune later
+  #limits:
+  #  global:
+  #    ingestion:
+  #      ingestionRateMB: 4
+  #      ingestionBurstSizeMB: 6
+  #    queries:
+  #      maxChunksPerQuery: 200000
+  #      maxQueryLength: 24h
+  #      maxQueryParallelism: 32
+
+  # Optional: controls retention per stream/tenant later via overrides
+  # retention:
+  #   days: 7
+
+  # Optional: route for the gateway (creates OpenShift Route)
+  #template:
+  #  gateway:
+  #    http:
+  #      route:
+  #        enabled: true
 
 ```
 </details>
@@ -252,7 +273,7 @@ Keep the recommended default openshift-logging
 and point the LogForwarder to loki which is the source in Grafana
 
 ```bash
-oc kustomize --enable-helm manifests/logging-and-reporting/redhat-logger | oc apply --server-side -f -
+oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/redhat-logger | oc apply --server-side -f -
 ```
 Create ServiceAccount & Bind Roles:
 ```bash
@@ -336,26 +357,28 @@ spec:
 ```
 </details>
 
+
+
 ## 🚀 Install Airlock Microgateway via OperatorHub
 
 > ⚠️ Warning
 > Starting in OpenShift Container Platform 4.19, the Ingress Operator manages the lifecycle of any Gateway API custom resource definitions (CRDs). This means that you will be denied access to creating, updating, and deleting any CRDs within the API groups that are grouped under Gateway API.
 
-If you have an OpenShift version <= 4.18 please uncomment the installation of the GatewayAPI CRDs or install it manually.
+### 🧩 Deploy GatewayAPI CRDs
 
-<details>
-<summary>Install GatewayAPI manual CRD installation</summary>
+If you have an OpenShift version <= 4.18 please install the GatewayAPI CRDs manually.
 
 ```bash
-oc apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-oc apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml # For backendTLS support e.g. OIDC example
-```
+# Please install experimental for backendTLS support e.g. OIDC example
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/experimental-install.yaml 
 
-</details>
+# Standard version with no experimental features. OIDC example will not work with it or needs to be manually adjusted.
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+```
 
 ### Airlock Microgateway configure the after it was installed via OperatorHub
 ```bash
-oc kustomize --enable-helm manifests/airlock-microgateway | oc apply -f -
+oc kustomize --enable-helm general-openshift/manifests/airlock-microgateway | oc apply -f -
 
 
 Activate the Podmonitor, by editing the subscription of the Airlock operator:
