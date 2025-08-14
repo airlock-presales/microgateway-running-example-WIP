@@ -83,7 +83,7 @@ oc kustomize --enable-helm general-openshift/manifests/logging-and-reporting/gra
 > You can now access
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 
-### Install Loki communiti edition via Operator Hub (from opdev) in namespace monitoring
+### Install Loki communiti edition via Operator Hub (from opdev)
 Open Loki via installed Operator and apply the following config.
 
 Apply RBAC to grant Loki access:
