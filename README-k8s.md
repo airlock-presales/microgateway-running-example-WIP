@@ -109,25 +109,10 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 
 ## 🚀 Deploy Airlock Microgateway
 
-> [!TIP]
-> Certain environments such as OpenShift or GKE require non-default configurations when installing the CNI plugin. In case that the CNI plugin does not start properly consult [Troubleshooting Microgateway CNI](https://docs.airlock.com/microgateway/latest/#data/1710781909882.html).
-
-[!NOTE]
-In case this example is not deployed in Rancher Desktop, most likely the `cniBinDir`and `cniNetDir`in the file `manifests/airlock-microgateway/microgateway-cni-values.yaml` must be adjusted.
-Example:
-
-```sh
-config:
-  cniBinDir: "/usr/libexec/cni/"
-  cniNetDir: "/etc/cni/net.d"
-```
-
 ```bash
-# Deploy Airlock Microgateway including the CNI plugin
 kubectl kustomize --enable-helm manifests/airlock-microgateway/overlays/k8s | kubectl apply -f -
 
 # Wait until Airlock Microgateway is up and running
-kubectl -n kube-system rollout status daemonset airlock-microgateway-microgateway-cni
 kubectl -n airlock-microgateway-system rollout status deployment
 ```
 

@@ -41,7 +41,7 @@ This example demonstrates how to secure web applications in Kubernetes using Air
 
 The WebProtect scenarios include two Gateway API deployment patterns:
 
-- **Shared Gateway** — a global Gateway shared between *Juice Shop* and *OIDC Demo*.  
+- **Shared Gateway** — a global Gateway shared between *Juice Shop* and *OIDC Demo*.
 - **Dedicated Gateway** — an isolated Gateway for *Nextcloud*, deployed as *cluster-local* (ClusterIP) and exposed indirectly through an *Ingress/Route*.
 
 This setup allows both *Ingress-first* environments and *Gateway API–centric* deployments to coexist within the same cluster.
@@ -50,15 +50,17 @@ This setup allows both *Ingress-first* environments and *Gateway API–centric* 
 
 ### Architecture Summary
 
-**Shared Gateway (Juice Shop & OIDC Demo)**  
-- A single Gateway instance serves multiple applications.  
-- Each application is attached via its own listener and `HTTPRoute`.  
+**Shared Gateway (Juice Shop & OIDC Demo)**
+
+- A single Gateway instance serves multiple applications.
+- Each application is attached via its own listener and `HTTPRoute`.
 - Simplifies management and TLS configuration for common demo or staging workloads.
 
-**Dedicated Gateway (Nextcloud)**  
-- A separate Gateway limited to cluster scope (`ClusterIP`).  
-- Not directly exposed externally.  
-- Accessible only through a traditional Ingress or OpenShift Route that forwards traffic into the internal Gateway.  
+**Dedicated Gateway (Nextcloud)**
+
+- A separate Gateway limited to cluster scope (`ClusterIP`).
+- Not directly exposed externally.
+- Accessible only through a traditional Ingress or OpenShift Route that forwards traffic into the internal Gateway.
 - Simulates environments where the *Ingress/Route* layer remains mandatory for policy compliance or routing consistency.
 
 ---
@@ -66,10 +68,9 @@ This setup allows both *Ingress-first* environments and *Gateway API–centric* 
 ### Traffic Flow
 
 - **Shared Gateway path**  
-  `Client → Shared Gateway (Gateway API) → HTTPRoute → Application Service`
-
+   `Client → Shared Gateway (Gateway API) → HTTPRoute → Application Service`
 - **Dedicated Gateway path (Nextcloud)**  
-  `Client → Ingress/Route → ClusterIP Gateway → HTTPRoute → Nextcloud Service`
+   `Client → Ingress/Route → ClusterIP Gateway → HTTPRoute → Nextcloud Service`
 
 ---
 
@@ -90,13 +91,15 @@ This setup allows both *Ingress-first* environments and *Gateway API–centric* 
 ### Recommendations
 
 Use the **shared Gateway** for:
-- Multi-app demo setups or lightweight environments.  
-- Shared policy enforcement and centralized TLS handling.  
+
+- Multi-app demo setups or lightweight environments.
+- Shared policy enforcement and centralized TLS handling.
 - Rapid onboarding of new services.
 
 Use the **dedicated Gateway** for:
-- Applications requiring strict isolation (like Nextcloud).  
-- Scenarios where Ingress/Routes are mandatory entry points.  
+
+- Applications requiring strict isolation (like Nextcloud).
+- Scenarios where Ingress/Routes are mandatory entry points.
 - Independent tuning, policy enforcement, or change management.
 
 ---
@@ -138,7 +141,7 @@ kubectl kustomize --enable-helm manifests/nextcloud-microgateway-config | kubect
 ```
 
 > [!NOTE]
-> You can now access Nextcloud via http://nextcloud-127-0-0-1.nip.io:8080/
+> You can now access Nextcloud via http://nextcloud-127-0-0-1.nip.io
 >
 > * Username: admin
 > * Password: changeme

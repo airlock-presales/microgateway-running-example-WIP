@@ -13,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: airlock-gateway
+            name: airlock-nextcloud-gateway
             port:
               number: 8080
