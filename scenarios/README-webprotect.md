@@ -69,18 +69,7 @@ More details are available in our documentation [Gateway deployment](https://doc
 
 ---
 
-### Traffic Flow
-
-- **Shared Gateway path**  
-   `Client → Microgateway as ingress (Gateway API) → HTTPRoute → Application Service`
-- **Dedicated Gateway path (Nextcloud)**  
-   `Client → Ingress API/Route → ClusterIP Microgateway (GatewayAPI) → HTTPRoute → Nextcloud Service`
-
----
-
-## 🧰 General Prerequisites
-
-Before continuing, make sure your environment is prepared by following the instructions in the [General Setup](../general) or [General-OpenShift Setup](../general-openshift).  
+Before continuing, make sure your environment is prepared by following the instructions in the [General Kubernetes Setup](../README-k8s.md) or [General OpenShift Setup](../README-openshift.md).  
 This includes installing required tools, deploying observability components, certificate authorities, Redis, and the Airlock Microgateway itself.
 
 ## 🛠 Deploy the examples:
