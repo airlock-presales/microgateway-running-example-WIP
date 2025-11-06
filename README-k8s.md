@@ -12,7 +12,7 @@ This guide provides the foundational setup required for running Airlock Microgat
 
 **Core Components:**
 
-- **Ingress Controller (e.g. Traefik)** – Routing and traffic management
+- **Ingress API Controller (e.g. Traefik)** – Routing and traffic management
 - **Airlock Microgateway** – Data plane security
 - **Prometheus & Grafana** – Metrics and dashboards
 - **Loki & Alloy** – Log aggregation and analysis
@@ -30,7 +30,7 @@ Make sure the following tools are installed:
 - [`kubectl`](https://kubernetes.io/docs/reference/kubectl/overview/)
 - [`helm`](https://helm.sh/docs/intro/install/)
 - [`kustomize`](https://kustomize.io) (version ≥ 5.2.1)
-- A running **Kubernetes cluster** with an **Ingress Controller** (e.g. Traefik, Ingress NGINX)
+- A running **Kubernetes cluster** with an **Ingress API Controller** (e.g. Traefik, Ingress NGINX)
 
 ### Airlock Microgateway Requirements
 

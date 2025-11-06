@@ -14,7 +14,7 @@ This example demonstrates how to secure web applications in Kubernetes using Air
 
 **Key Components:**
 
-- **Ingress Controller (Traefik)** for routing
+- **Ingress API Controller (Traefik)** for routing
 - **Airlock Microgateway** for protection and routing
 - **Prometheus + Grafana** for metrics
 - **Loki + Alloy** for logging
@@ -39,39 +39,42 @@ This example demonstrates how to secure web applications in Kubernetes using Air
 
 ### Overview
 
+> [!NOTE]
+> Gateway API (exposed via a Service: LoadBalancer) acts as an ingress for traffic, but it is not the legacy Kubernetes Ingress API. It replaces the old Ingress resource with a richer, standardized model!
+
 The WebProtect scenarios include two Gateway API deployment patterns:
 
-- **Microgateway as Ingress** — a global Gateway shared between *Juice Shop* and *OIDC Demo*.
-- **Microgateway as an in-cluster Gateway** — an isolated Gateway for *Nextcloud*, deployed as *cluster-local* (ClusterIP) and exposed indirectly through an *Ingress/Route*.
+- **Microgateway as ingress (type LoadBalancer)** — a global Microgateway shared between *Juice Shop* and *OIDC Demo*.
+- **Microgateway as an in-cluster Gateway** — an isolated Microgateway for *Nextcloud*, deployed as *cluster-local* (ClusterIP) and exposed indirectly through an *Ingress API/Route*.
 
-This setup allows both *Ingress-first* environments and *Gateway API–centric* deployments to coexist within the same cluster.
+This setup allows both _Ingress API-first_ environments and _Gateway API–centric_ deployments to coexist within the same cluster.
 More details are available in our documentation [Gateway deployment](https://docs.airlock.com/microgateway/latest/index/1725073468781.html#Gateway_deployment)
 
 ---
 
 ### Architecture Summary
 
-**Shared Gateway (Juice Shop & OIDC Demo)**
+**Microgateway as ingress (Juice Shop & OIDC Demo)**
 
 - A single Gateway instance serves multiple applications.
 - Each application is attached via its own `HTTPRoute`.
 - Simplifies management and TLS configuration for common demo or staging workloads.
 
-**Dedicated Gateway (Nextcloud)**
+**Microgateway as an in-cluster Gateway (Nextcloud)**
 
-- A separate Gateway limited to cluster scope (`ClusterIP`).
+- A dedicated Gateway limited to cluster scope (`ClusterIP`).
 - Not directly exposed externally.
-- Accessible only through a traditional Ingress or OpenShift Route that forwards traffic into the internal Gateway.
-- Simulates environments where the *Ingress/Route* layer remains mandatory for policy compliance or routing consistency.
+- Accessible only through a traditional Ingress API or OpenShift Route that forwards traffic into the internal Gateway.
+- Simulates environments where the *Ingress API/Route* layer remains mandatory for policy compliance or routing consistency.
 
 ---
 
 ### Traffic Flow
 
 - **Shared Gateway path**  
-   `Client → Shared Gateway (Gateway API) → HTTPRoute → Application Service`
+   `Client → Microgateway as ingress (Gateway API) → HTTPRoute → Application Service`
 - **Dedicated Gateway path (Nextcloud)**  
-   `Client → Ingress/Route → ClusterIP Gateway → HTTPRoute → Nextcloud Service`
+   `Client → Ingress API/Route → ClusterIP Microgateway (GatewayAPI) → HTTPRoute → Nextcloud Service`
 
 ---
 
