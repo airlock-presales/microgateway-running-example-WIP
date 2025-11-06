@@ -14,8 +14,8 @@ Extend your secure deployment by integrating **authentication and authorization*
 
 **Flow Summary:**
 
-- Requests routed through **Traefik Ingress**
-- Services protected with **Airlock Microgateway** in **sidecarless data plane mode**
+- Requests routed through **Microgateway as ingress (GatewayAPI)**
+- Services protected with **Airlock Microgateway** in mode: **as ingress (⚠️ not Ingress API)**
 - Observability stack (Prometheus, Grafana, Alloy and Loki)
 - Authentication via **Microsoft Entra ID (formerly known as Azure AD)**
 
