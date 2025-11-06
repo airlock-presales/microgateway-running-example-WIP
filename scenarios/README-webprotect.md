@@ -41,10 +41,11 @@ This example demonstrates how to secure web applications in Kubernetes using Air
 
 The WebProtect scenarios include two Gateway API deployment patterns:
 
-- **Shared Gateway** — a global Gateway shared between *Juice Shop* and *OIDC Demo*.
-- **Dedicated Gateway** — an isolated Gateway for *Nextcloud*, deployed as *cluster-local* (ClusterIP) and exposed indirectly through an *Ingress/Route*.
+- **Microgateway as Ingress** — a global Gateway shared between *Juice Shop* and *OIDC Demo*.
+- **Microgateway as an in-cluster Gateway** — an isolated Gateway for *Nextcloud*, deployed as *cluster-local* (ClusterIP) and exposed indirectly through an *Ingress/Route*.
 
 This setup allows both *Ingress-first* environments and *Gateway API–centric* deployments to coexist within the same cluster.
+More details are available in our documentation [Gateway deployment](https://docs.airlock.com/microgateway/latest/index/1725073468781.html#Gateway_deployment)
 
 ---
 
@@ -53,7 +54,7 @@ This setup allows both *Ingress-first* environments and *Gateway API–centric* 
 **Shared Gateway (Juice Shop & OIDC Demo)**
 
 - A single Gateway instance serves multiple applications.
-- Each application is attached via its own listener and `HTTPRoute`.
+- Each application is attached via its own `HTTPRoute`.
 - Simplifies management and TLS configuration for common demo or staging workloads.
 
 **Dedicated Gateway (Nextcloud)**
@@ -71,36 +72,6 @@ This setup allows both *Ingress-first* environments and *Gateway API–centric* 
    `Client → Shared Gateway (Gateway API) → HTTPRoute → Application Service`
 - **Dedicated Gateway path (Nextcloud)**  
    `Client → Ingress/Route → ClusterIP Gateway → HTTPRoute → Nextcloud Service`
-
----
-
-### Advantages and Disadvantages
-
-| Category | Shared Gateway | Dedicated Gateway |
-|-----------|----------------|-------------------|
-| **Isolation** | Limited; multiple apps share one dataplane | Strong; each app is fully isolated |
-| **Complexity** | Simpler; centralized configuration | More components; separate Gateway + Ingress |
-| **Resource Efficiency** | Lower overhead; single dataplane | Higher footprint; per-app dataplane |
-| **Operational Overhead** | Easier updates; one place to manage | Independent lifecycles and policies |
-| **Failure Domain** | One Gateway failure may affect multiple apps | Failures are confined to a single app |
-| **Security & Compliance** | Shared configuration and certificates | Per-application isolation and stricter boundaries |
-| **TLS Handling** | Single certificate and listener set | Separate certificate lifecycle |
-
----
-
-### Recommendations
-
-Use the **shared Gateway** for:
-
-- Multi-app demo setups or lightweight environments.
-- Shared policy enforcement and centralized TLS handling.
-- Rapid onboarding of new services.
-
-Use the **dedicated Gateway** for:
-
-- Applications requiring strict isolation (like Nextcloud).
-- Scenarios where Ingress/Routes are mandatory entry points.
-- Independent tuning, policy enforcement, or change management.
 
 ---
 
