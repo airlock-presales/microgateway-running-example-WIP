@@ -14,10 +14,11 @@ This example demonstrates how to secure web applications in Kubernetes using Air
 
 **Key Components:**
 
-- **Ingress API Controller (Traefik)** for routing
-- **Airlock Microgateway** for protection and routing
-- **Prometheus + Grafana** for metrics
-- **Loki + Alloy** for logging
+- **Klipper-LB** is the implementation used by ServiceLB to expose LoadBalancer services via host ports.
+- **Ingress API Controller (Traefik)** for non GatewayAPI traffic.
+- **Airlock Microgateway** for protection and routing.
+- **Prometheus + Grafana** for metrics.
+- **Loki + Alloy** for logging.
 
 ---
 
