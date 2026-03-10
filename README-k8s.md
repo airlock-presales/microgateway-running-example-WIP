@@ -105,7 +105,7 @@ kubectl -n monitoring rollout status deployment,daemonset,statefulset
 > * Prometheus via http://prometheus-127-0-0-1.nip.io/
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 >
-> Tempo OTLP endpoints are available in-cluster on `tempo.monitoring.svc.cluster.local:4317` (gRPC) and `tempo.monitoring.svc.cluster.local:4318` (HTTP).
+> Tempo OTLP endpoints are available in-cluster on `tempo.monitoring.svc.cluster.local:55680` (gRPC, OTLP legacy) and `tempo.monitoring.svc.cluster.local:55681` (HTTP, OTLP legacy).
 
 ## 🚀 Deploy Airlock Microgateway
 
