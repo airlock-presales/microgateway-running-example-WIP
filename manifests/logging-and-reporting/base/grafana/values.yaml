@@ -38,7 +38,12 @@ datasources:
       version: 1
       isDefault: true
       jsonData:
-        maxLines: 1000
+        maxLines: 5000
+        derivedFields:
+        - name: trace_id
+          matcherRegex: trace_id=(\w+)
+          datasourceUid: tempo
+          url: $${__value.raw}
     - name: Prometheus
       uid: prometheus
       type: prometheus
