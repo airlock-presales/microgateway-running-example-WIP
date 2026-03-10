@@ -31,6 +31,7 @@ datasources:
     apiVersion: 1
     datasources:
     - name: loki
+      uid: loki
       type: loki
       url: http://loki-gateway/
       access: proxy
@@ -39,11 +40,13 @@ datasources:
       jsonData:
         maxLines: 1000
     - name: prometheus
+      uid: prometheus
       type: prometheus
       url: http://kube-prometheus-stack-prometheus:9090/
       access: proxy
       isDefault: false
     - name: tempo
+      uid: tempo
       type: tempo
       url: http://tempo:3100
       access: proxy
