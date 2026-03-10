@@ -1,0 +1,11 @@
+---
+tempo:
+  retention: 24h
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+        http:
+
+service:
+  type: ClusterIP

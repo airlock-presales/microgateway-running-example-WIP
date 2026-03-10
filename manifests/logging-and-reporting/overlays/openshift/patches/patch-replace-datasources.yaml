@@ -15,6 +15,15 @@ data:
       isDefault: true
       jsonData:
         maxLines: 1000
+    - name: tempo
+      type: tempo
+      url: http://tempo:3100
+      access: proxy
+      isDefault: false
+      jsonData:
+        httpMethod: GET
+        serviceMap:
+          datasourceUid: Prometheus
     - name: Prometheus
       type: prometheus
       access: proxy

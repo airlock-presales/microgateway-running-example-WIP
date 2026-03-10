@@ -43,6 +43,15 @@ datasources:
       url: http://kube-prometheus-stack-prometheus:9090/
       access: proxy
       isDefault: false
+    - name: tempo
+      type: tempo
+      url: http://tempo:3100
+      access: proxy
+      isDefault: false
+      jsonData:
+        httpMethod: GET
+        serviceMap:
+          datasourceUid: prometheus
 
 env:
   GF_AUTH_ANONYMOUS_ENABLED: true
