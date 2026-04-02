@@ -1,0 +1,47 @@
+# failure conditions
+faults:
+  delay: false
+  error: false
+  unhealthy: false
+  unready: false
+  testFail: false
+  testTimeout: false
+
+# -- Expose the service via Gateway HTTPRoute
+# Requires a Gateway controller
+# Docs https://gateway-api.sigs.k8s.io/guides/
+httpRoute:
+  # HTTPRoute enabled.
+  enabled: true
+  # Add additional labels to the HTTPRoute.
+  additionalLabels: {}
+  # HTTPRoute annotations.
+  annotations: {}
+  # Which Gateways this Route is attached to.
+  parentRefs:
+    - name: airlock-gateway
+      sectionName: http
+      namespace: airlock-gateway
+  # Hostnames matching HTTP header.
+  hostnames:
+    - tracing-demo-127-0-0-1.nip.io
+  # List of rules and filters applied.
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# Additional command line arguments to pass to podinfo container
+extraArgs:
+  - --otel-service-name=podinfo
+  - --level=info
+
+# Extra environment variables for the podinfo container
+extraEnvs:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://alloy.monitoring.svc.cluster.local:4317"
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: "grpc"
+  - name: OTEL_EXPORTER_OTLP_INSECURE
+    value: "true"
