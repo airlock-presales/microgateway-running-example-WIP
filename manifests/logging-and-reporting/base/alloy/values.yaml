@@ -3,10 +3,22 @@ controller:
   replicas: 1
 
 alloy:
+  extraPorts:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+
   configMap:
     create: true
     content: |
-      // Discover all pods cluster-wide
+      // -------------------------------------------------------------------
+      // Kubernetes pod logs for Airlock sidecars -> Loki
+      // -------------------------------------------------------------------
       discovery.kubernetes "pod" {
         role = "pod"
       }
@@ -42,7 +54,6 @@ alloy:
           target_label  = "app"
           action        = "replace"
         }
-        // Optional: capture engine version label
         rule {
           source_labels = ["__meta_kubernetes_pod_label_sidecar_microgateway_airlock_com_engineVersion"]
           target_label  = "engine_version"
@@ -57,25 +68,60 @@ alloy:
         }
       }
 
-      // Tail via Kubernetes API (no hostPath mounts)
       loki.source.kubernetes "sidecars" {
         targets    = discovery.relabel.airlock_sidecars.output
         forward_to = [loki.process.airlock.receiver]
       }
 
-      // Optional pipelines (add filters/parsers here)
       loki.process "airlock" {
-        // Example: drop noisy lines
-        // stage.drop {
-        //   expression = "unknown-service"
-        // }
         stage.static_labels {
           values = { cluster = "my-cluster" }
         }
         forward_to = [loki.write.default.receiver]
       }
 
-      // Push to Loki
+      // -------------------------------------------------------------------
+      // OTLP receiver for applications
+      // traces -> Tempo
+      // logs   -> Loki
+      // metrics are intentionally not forwarded
+      // -------------------------------------------------------------------
+      otelcol.receiver.otlp "apps" {
+        grpc {
+          endpoint = "0.0.0.0:4317"
+        }
+
+        http {
+          endpoint = "0.0.0.0:4318"
+        }
+
+        output {
+          traces = [otelcol.processor.batch.traces.input]
+          logs   = [otelcol.exporter.loki.otlp.input]
+        }
+      }
+
+      otelcol.processor.batch "traces" {
+        output {
+          traces = [otelcol.exporter.otlp.tempo.input]
+        }
+      }
+
+      otelcol.exporter.otlp "tempo" {
+        client {
+          endpoint = "tempo.monitoring.svc.cluster.local:4317"
+          tls {
+            insecure             = true
+            insecure_skip_verify = true
+          }
+        }
+      }
+
+      otelcol.exporter.loki "otlp" {
+        forward_to = [loki.write.default.receiver]
+      }
+
+      // Shared Loki writer for both scraped logs and OTLP logs
       loki.write "default" {
         endpoint {
           url       = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
@@ -83,10 +129,10 @@ alloy:
         }
       }
 
-#resources:
-#  requests:
-#    cpu: 100m
-#    memory: 128Mi
-#  limits:
-#    cpu: 200m
-#    memory: 256Mi
+# resources:
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
+#   limits:
+#     cpu: 200m
+#     memory: 256Mi
