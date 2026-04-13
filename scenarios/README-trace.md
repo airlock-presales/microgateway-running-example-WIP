@@ -52,7 +52,7 @@ kubectl -n trace-demo rollout status deployment podinfo podinfo-slow
 ```
 
 > [!NOTE]
-> You can now access the Podinfo web application via http://tracing-127-0-0-1.nip.io:8080
+> You can now access the Podinfo web application via http://tracing-127-0-0-1.nip.io:8080 or http://tracing-slow-127-0-0-1.nip.io:8080
 
 ## 🔍 Investigate Traces in Grafana
 
