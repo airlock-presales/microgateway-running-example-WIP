@@ -1,6 +1,10 @@
+ui:
+  color: "#7c3534"
+  message: "I am so slow"
+
 # failure conditions
 faults:
-  delay: false
+  delay: true
   error: false
   unhealthy: false
   unready: false
@@ -24,7 +28,7 @@ httpRoute:
       namespace: airlock-gateway
   # Hostnames matching HTTP header.
   hostnames:
-    - tracing-127-0-0-1.nip.io
+    - tracing-slow-127-0-0-1.nip.io
   # List of rules and filters applied.
   rules:
     - matches:
@@ -34,7 +38,7 @@ httpRoute:
 
 # Additional command line arguments to pass to podinfo container
 extraArgs:
-  - --otel-service-name=podinfo
+  - --otel-service-name=podinfo-slow
   - --level=info
 
 # Extra environment variables for the podinfo container

@@ -10,6 +10,8 @@ This example demonstrates how to integrate Airlock Microgateway with OpenTelemet
 
 ## 🖼 Architecture Overview
 
+![Topology Diagram](media/topology-tracing.svg)
+
 **Key Components:**
 
 - **Gateway API** for routing traffic.
@@ -24,7 +26,8 @@ This example demonstrates how to integrate Airlock Microgateway with OpenTelemet
 
 | Application | URL |
 |------------|-----|
-| Podinfo | [http://tracing-demo-127-0-0-1.nip.io/](http://tracing-demo-127-0-0-1.nip.io/) |
+| Podinfo | [http://tracing-127-0-0-1.nip.io:8080/](http://tracing-127-0-0-1.nip.io:8080/) |
+| Podinfo-slow | [http://tracing-slow-127-0-0-1.nip.io:8080/](http://tracing-slow-127-0-0-1.nip.io:8080/) |
 | Grafana | [http://grafana-127-0-0-1.nip.io](http://grafana-127-0-0-1.nip.io) |
 
 ---
@@ -45,15 +48,15 @@ Deploy the `podinfo` application which includes the Airlock Microgateway HTTPRou
 kubectl kustomize --enable-helm manifests/podinfo | kubectl apply --server-side -f -
 
 # Wait until Podinfo is up and running
-kubectl -n trace-demo rollout status deployment podinfo
+kubectl -n trace-demo rollout status deployment podinfo podinfo-slow
 ```
 
 > [!NOTE]
-> You can now access the Podinfo web application via http://tracing-demo-127-0-0-1.nip.io
+> You can now access the Podinfo web application via http://tracing-127-0-0-1.nip.io:8080
 
 ## 🔍 Investigate Traces in Grafana
 
-1. Open your browser and generate some traffic by navigating to [http://tracing-demo-127-0-0-1.nip.io](http://tracing-demo-127-0-0-1.nip.io).
+1. Open your browser and generate some traffic by navigating to [http://tracing-127-0-0-1.nip.io:8080](http://tracing-127-0-0-1.nip.io:8080) or [http://tracing-slow-127-0-0-1.nip.io:8080](http://tracing-slow-127-0-0-1.nip.io:8080).
 2. Access your Grafana instance (deployed in the generic setup).
 3. Open the **Explore** tab.
 4. Select **Tempo** as the data source.

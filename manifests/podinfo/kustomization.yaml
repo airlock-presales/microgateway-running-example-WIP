@@ -15,6 +15,11 @@ helmCharts:
     version: 6.11.2
     releaseName: podinfo
     valuesFile: values.yaml
+  - name: podinfo
+    repo: https://stefanprodan.github.io/podinfo
+    version: 6.11.2
+    releaseName: podinfo-slow
+    valuesFile: values-slow.yaml
 
 patches:
   - target:
