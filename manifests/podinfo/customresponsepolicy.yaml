@@ -44,3 +44,50 @@ spec:
         #          end: 599
         #  customResponseRef:
         #    name: upstream-5xx
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponsePolicy
+metadata:
+  name: podinfo-slow-response-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: podinfo-slow
+  policies:
+    local:
+      # Customize all local error responses for other requests
+      - responses:
+          - statusCodeCondition:
+              matcher:
+                range:
+                  start: 400
+                  end: 499
+            customResponseRef:
+              name: podinfo-response
+        #- statusCodeCondition:
+        #    matcher:
+        #      range:
+        #        start: 500
+        #        end: 599
+        #  customResponseRef:
+        #    name: sad-500
+    upstream:
+      # Replace all other upstream error responses
+      - responses:
+          - responseConditions:
+              statusCode:
+                matcher:
+                  range:
+                    start: 400
+                    end: 499
+            customResponseRef:
+              name: podinfo-response # upstream-4xx
+        #- responseConditions:
+        #    statusCode:
+        #      matcher:
+        #        range:
+        #          start: 500
+        #          end: 599
+        #  customResponseRef:
+        #    name: upstream-5xx
