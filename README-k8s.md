@@ -61,8 +61,16 @@ kubectl -n airlock-microgateway-system create secret generic airlock-microgatewa
 
 In order to be able to use GatewayAPI you have to deploy the CRDs in advance.
 
+⚠️ As as Rancher Desktop (k3s) comes with Traefik by default, it also comes with outdated GatewayAPI CRDs which will result in an error.
+
 ```bash
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml
+# No Gateway API CRDs or not managed via HELM
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+```
+
+```bash
+# Gateway API predeployed by different HELM package like Traefik in Rancher Desktop
+kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
 ```
 
 ## 📜 Deploy Cert-Manager
@@ -106,7 +114,12 @@ kubectl -n monitoring rollout status deployment,daemonset,statefulset
 > * Prometheus via http://prometheus-127-0-0-1.nip.io/
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 >
-> Tempo OTLP endpoints are available in-cluster on `tempo.monitoring.svc.cluster.local:55680` (gRPC, OTLP legacy) and `tempo.monitoring.svc.cluster.local:55681` (HTTP, OTLP legacy).
+> Alloy endpoints are available in-cluster on `alloy.monitoring.svc.cluster.local` 
+> * OTLP: 4317 gRPC, 4318 HTTP
+>
+> Tempo endpoints are available in-cluster on `tempo.monitoring.svc.cluster.local` 
+> * OTLP: 4317 gRPC, 4318 HTTP
+> * Jaeger: 14250 gRPC, 6832 binary, 6831 compact, 14268 HTTP.
 
 ## 🚀 Deploy Airlock Microgateway
 

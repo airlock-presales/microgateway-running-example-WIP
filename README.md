@@ -34,6 +34,7 @@ This repository includes hands-on examples to help you deploy and use Airlock Mi
 - [`README-openshift`](./README-openshift.md): Based on Red Hat OpenShift
 - [`README-webprotect`](./scenarios/README-webprotect.md): Secure your web application against threats.
 - [`README-oidc`](./scenarios/README-oidc.md): Integrate upfront authentication and access control using OIDC.
+- [`README-trace`](./scenarios/README-trace.md): Track and visualize request flows to your microservices using OpenTelemetry distributed tracing.
 
 ## 🏁 Quick Start (K8s only)
 
