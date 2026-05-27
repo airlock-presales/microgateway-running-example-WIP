@@ -13,4 +13,4 @@ spec:
             always: {}
         exporter:
           grpcEndpoint:
-            uri: "http://tempo.monitoring.svc.cluster.local:4317"
+            uri: "http://alloy.monitoring.svc.cluster.local:4317"

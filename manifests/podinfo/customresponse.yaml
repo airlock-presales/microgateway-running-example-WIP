@@ -1,0 +1,16 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponse
+metadata:
+  name: podinfo-response
+spec:
+  # replace status code with 400 when this custom response is served
+  statusCode: 400
+
+  # provide error responses for HTML
+  content:
+    - contentType: text/html
+      body:
+        valueFrom:
+          configMapKeyRef:
+            name: block-400
+            key: block_400.html
