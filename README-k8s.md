@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/airlock/microgateway/main/media/Microgateway_Labeled_AlignRight.svg" alt="Microgateway Logo" width="250">
 </p>
 
-This guide provides the foundational setup required for running Airlock Microgateway examples within a Kubernetes environment such as Rancher Desktop. It includes all general steps like licensing, infrastructure setup, logging, monitoring, and installing the Microgateway.
+This guide provides the foundational setup required for running Airlock Microgateway examples within a Kubernetes environment such as Rancher Desktop. It includes all general steps like infrastructure setup, logging, monitoring, and installing the Microgateway (licensing is optional and only required for authentication and security functionalities).
 
 ---
 
@@ -41,9 +41,9 @@ Make sure the following tools are installed:
 
 ---
 
-## 🛡️ Install License
+## 🛡️ Install License (Optional)
 
-📝 You must obtain a valid license before continuing:
+📝 A license is no longer needed for basic usage. It is only required if you want to use authentication and security functionalities. If needed, you must obtain a valid license before continuing:
 
 - **Community License**: [airlock.com/microgateway-community](https://airlock.com/en/microgateway-community)
 - **Premium License**: [airlock.com/microgateway-premium](https://airlock.com/en/microgateway-premium)
@@ -65,12 +65,12 @@ In order to be able to use GatewayAPI you have to deploy the CRDs in advance.
 
 ```bash
 # No Gateway API CRDs or not managed via HELM
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml
 ```
 
 ```bash
 # Gateway API predeployed by different HELM package like Traefik in Rancher Desktop
-kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml
 ```
 
 ## 📜 Deploy Cert-Manager
@@ -114,10 +114,12 @@ kubectl -n monitoring rollout status deployment,daemonset,statefulset
 > * Prometheus via http://prometheus-127-0-0-1.nip.io/
 > * Grafana via http://grafana-127-0-0-1.nip.io/
 >
-> Alloy endpoints are available in-cluster on `alloy.monitoring.svc.cluster.local` 
+> Alloy endpoints are available in-cluster on `alloy.monitoring.svc.cluster.local`
+>
 > * OTLP: 4317 gRPC, 4318 HTTP
 >
-> Tempo endpoints are available in-cluster on `tempo.monitoring.svc.cluster.local` 
+> Tempo endpoints are available in-cluster on `tempo.monitoring.svc.cluster.local`
+>
 > * OTLP: 4317 gRPC, 4318 HTTP
 > * Jaeger: 14250 gRPC, 6832 binary, 6831 compact, 14268 HTTP.
 
