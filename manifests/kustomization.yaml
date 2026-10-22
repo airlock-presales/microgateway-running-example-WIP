@@ -15,3 +15,4 @@ resources:
   - juice-shop-microgateway-config
   - webserver
   - webserver-microgateway-config
+  - mcp

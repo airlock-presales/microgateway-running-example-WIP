@@ -1,0 +1,76 @@
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: AccessControlPolicy
+metadata:
+  name: github-mcp
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: github-mcp
+  policies:
+    # Allow the read-only GitHub MCP tools, but only for users whose email ends in @airlock.com.
+    # The mcp-name header holds the name of the called tool. The tools are split over two
+    # policies because a regex may have at most 256 characters.
+    # Known limitation: the client sets mcp-name and nothing checks it against the tool name in
+    # the JSON-RPC body. A client that sends a wrong header, or none at all, is not stopped here.
+    # Read-only tools starting with get_ or ending in _read.
+    - requestConditions:
+        header:
+          name:
+            matcher:
+              exact: "mcp-name"
+          value:
+            matcher:
+              regex: "^(get_commit|get_file_contents|get_label|get_latest_release|get_me|get_release_by_tag|get_tag|get_team_members|get_teams|issue_read|pull_request_read)$"
+              ignoreCase: true
+      authorization:
+        requireAll:
+          - jwt:
+              claim:
+                name: email
+                value:
+                  matcher:
+                    suffix: "@airlock.com"
+        authentication:
+          jwt:
+            jwtRef:
+              name: keycloak
+    # Read-only tools starting with list_ or search_.
+    - requestConditions:
+        header:
+          name:
+            matcher:
+              exact: "mcp-name"
+          value:
+            matcher:
+              regex: "^(list_branches|list_commits|list_issue_fields|list_issue_types|list_issues|list_pull_requests|list_releases|list_repository_collaborators|list_tags|search_code|search_commits|search_issues|search_pull_requests|search_repositories|search_users)$"
+              ignoreCase: true
+      authorization:
+        requireAll:
+          - jwt:
+              claim:
+                name: email
+                value:
+                  matcher:
+                    suffix: "@airlock.com"
+        authentication:
+          jwt:
+            jwtRef:
+              name: keycloak
+    # Allow MCP protocol requests without an mcp-name header, such as initialize and tools/list,
+    # for every user with a valid Keycloak token. Without this policy no client can connect.
+    - requestConditions:
+        header:
+          name:
+            matcher:
+              exact: "mcp-name"
+        invert: true
+      authorization:
+        authentication:
+          jwt:
+            jwtRef:
+              name: keycloak
+    # Deny every request that the policies above do not allow.
+    - authorization:
+        deny: {}

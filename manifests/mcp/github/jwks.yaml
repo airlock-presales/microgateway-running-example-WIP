@@ -1,0 +1,8 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: JWKS
+metadata:
+  name: keycloak
+spec:
+  provider:
+    remote:
+      uri: http://keycloak.mcp.svc.cluster.local:8080/realms/mcp/protocol/openid-connect/certs

@@ -1,0 +1,36 @@
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponse
+metadata:
+  name: oauth-protected-resource
+spec:
+  statusCode: 200
+  content:
+    - contentType: application/json
+      headers:
+        - name: access-control-allow-origin
+          value: "*"
+        - name: access-control-allow-methods
+          value: GET, OPTIONS
+        - name: access-control-allow-headers
+          value: content-type
+      body:
+        value: |-
+          {
+            "resource": "https://github-mcp-127-0-0-1.nip.io:8443/mcp",
+            "authorization_servers": [
+              "https://auth-127-0-0-1.nip.io:8443/realms/mcp"
+            ],
+            "scopes_supported": [
+              "openid",
+              "profile",
+              "email"
+            ],
+            "bearer_methods_supported": [
+              "header",
+              "body",
+              "query"
+            ],
+            "mcp_protocol_version": "2025-06-18",
+            "resource_type": "mcp-server"
+          }

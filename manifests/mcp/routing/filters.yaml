@@ -1,0 +1,18 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyHTTPFilter
+metadata:
+  name: mcp-parser
+spec:
+  value:
+    name: envoy.filters.http.mcp
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.filters.http.mcp.v3.Mcp
+      traffic_mode: REJECT_NO_MCP
+      max_request_body_size: 65536
+      parser_config:
+        group_metadata_key: mcp_group
+        methods:
+          - method: tools/call
+            extraction_rules:
+              - path: params.name
+      propagate_trace_context: {}

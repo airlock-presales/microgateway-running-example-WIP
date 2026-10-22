@@ -3,8 +3,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- sessionstore
-- gateway.yaml
-- gatewayparameters.yaml
-- namespace.yaml
-- telemetry.yaml
+  - namespace.yaml
+  - gateway.yaml
+  - gatewayparameters.yaml
+  - telemetry.yaml
+  # OIDC scenario: shared session store configuration.
+  - sessionstore

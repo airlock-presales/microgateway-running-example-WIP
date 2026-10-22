@@ -16,10 +16,18 @@ spec:
       placement: {}
       engineContainer: {}
       automountServiceAccountToken: false
+  features:
+    # MCP scenario: route to the external GitHub MCP service.
+    externalNameServicesAllowed: true
+    # MCP scenario: enable the Envoy MCP inspection filter.
+    envoyExtensionPolicyEnabled: true
   defaults:
     contentSecurity:
-      secured: {} # Enables WAAP processing in general with the default configuration of filter and mutation rules.
+      # Web protection scenario: enable WAAP processing with the default rules.
+      secured: {}
+    # OIDC scenario: manage gateway sessions in Valkey.
     sessionHandlingRef:
-      name: sessionagent # This configures the session management via Valkey for the gateway
+      name: sessionagent
+    # MCP and tracing scenarios: use the shared telemetry configuration.
     telemetryRef:
-      name: gateway-telemetry # This configures the telemetry streaming of the gateway
+      name: gateway-telemetry

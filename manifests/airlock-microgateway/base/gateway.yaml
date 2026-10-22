@@ -11,13 +11,14 @@ spec:
       kind: GatewayParameters
       name: gatewayparameters
   gatewayClassName: airlock-microgateway
+  # OIDC and MCP scenarios: allow application-specific HTTPS ListenerSets.
   allowedListeners:
     namespaces:
       from: All
   listeners:
-  - name: http
-    port: 8080
-    protocol: HTTP
-    allowedRoutes:
-      namespaces:
-        from: All
+    - name: http
+      port: 8080
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All

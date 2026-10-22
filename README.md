@@ -36,6 +36,7 @@ This repository includes hands-on examples to help you deploy and use Airlock Mi
 - [`README-webprotect`](./scenarios/README-webprotect.md): Secure your web application against threats ⚠️ **(Filtering license required)**.
 - [`README-oidc`](./scenarios/README-oidc.md): Integrate upfront authentication and access control using OIDC ⚠️ **(Auth license required)**.
 - [`README-trace`](./scenarios/README-trace.md): Track and visualize request flows to your microservices using OpenTelemetry distributed tracing.
+- [`README-mcp`](./scenarios/README-mcp.md): Protect the GitHub MCP server with Keycloak authentication, tool access policies and monitoring; includes an optional local routing lab.
 
 ## 🏁 Quick Start (K8s only)
 
@@ -58,6 +59,10 @@ kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/re
 ```bash
 kubectl kustomize --enable-helm manifests | kubectl apply --server-side -f -
 ```
+
+The MCP scenario also needs a GitHub token configured after deployment; follow
+[`README-mcp`](./scenarios/README-mcp.md). To run only MCP on an existing installation,
+use that scenario's commands to avoid deploying the other applications.
 
 ---
 

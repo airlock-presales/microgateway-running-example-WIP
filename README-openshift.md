@@ -193,13 +193,20 @@ If you have an OpenShift version <= 4.18 please install the GatewayAPI CRDs manu
 kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml
 ```
 
-### Airlock Microgateway configure the after it was installed via OperatorHub
+### Configure Airlock Microgateway after installation via OperatorHub
+
+This installs the shared gateway configuration for all scenarios from
+[`manifests/airlock-microgateway/base`](manifests/airlock-microgateway/base).
+Scenario-specific settings are marked with comments in the manifests.
 
 ```bash
+# Includes the Gateway, GatewayParameters, session store configuration and Telemetry.
 oc kustomize --enable-helm --helm-command helm3 manifests/airlock-microgateway/overlays/openshift | oc apply -f -
+```
 
+Enable gateway PodMonitor creation in the Airlock operator's Subscription:
 
-Activate the Podmonitor, by editing the subscription of the Airlock operator:
+```yaml
 spec:
   config:
     env:
@@ -208,6 +215,13 @@ spec:
 ```
 
 ---
+
+## Application Scenarios
+
+- [Web protection](scenarios/README-webprotect.md)
+- [OIDC authentication](scenarios/README-oidc.md)
+- [Distributed tracing](scenarios/README-trace.md)
+- [MCP gateway](scenarios/README-mcp.md) (Kubernetes manifests; adapt workload security settings to your OpenShift SCC)
 
 ## 📚 Resources
 

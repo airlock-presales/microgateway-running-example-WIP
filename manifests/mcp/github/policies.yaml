@@ -1,0 +1,21 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: github-mcp
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: github-mcp}
+  envoyHTTPFilterRefs:
+    prepend:
+      - name: mcp-filter
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: ContentSecurityPolicy
+metadata:
+  name: mcp-github
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: github-mcp}
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: oauth-protected-resource}
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-keycloak}
+  unsecured: {}

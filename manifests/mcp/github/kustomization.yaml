@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mcp
+resources:
+  - keycloak.yaml
+  - listenerset.yaml
+  - service.yaml
+  - backendtlspolicy.yaml
+  - accesscontrolpolicy.yaml
+  - customresponse.yaml
+  - customresponsepolicy.yaml
+  - httproute-github-mcp.yaml
+  - httproute-oauth-protected-resource.yaml
+  - jwks.yaml
+  - jwt.yaml
+  - envoyhttpfilter-mcp-filter.yaml
+  - policies.yaml
+configMapGenerator:
+  - name: mcp-keycloak-realm
+    files:
+      - realm.json

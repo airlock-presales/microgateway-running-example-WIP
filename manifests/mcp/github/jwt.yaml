@@ -1,0 +1,11 @@
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: JWT
+metadata:
+  name: keycloak
+spec:
+  requireAny:
+    - jwksRef:
+        name: keycloak
+      issuer: https://auth-127-0-0-1.nip.io:8443/realms/mcp
+  expirationRequired: true

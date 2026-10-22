@@ -125,7 +125,12 @@ kubectl -n monitoring rollout status deployment,daemonset,statefulset
 
 ## 🚀 Deploy Airlock Microgateway
 
+This installs the shared gateway configuration for all scenarios from
+[`manifests/airlock-microgateway/base`](manifests/airlock-microgateway/base).
+Scenario-specific settings are marked with comments in the manifests.
+
 ```bash
+# Includes the Gateway, GatewayParameters, session store configuration and Telemetry.
 kubectl kustomize --enable-helm manifests/airlock-microgateway/overlays/k8s | kubectl apply -f -
 
 # Wait until Airlock Microgateway is up and running
@@ -133,6 +138,15 @@ kubectl -n airlock-microgateway-system rollout status deployment
 ```
 
 ---
+
+## Application Scenarios
+
+With the shared infrastructure installed, deploy each example independently:
+
+- [Web protection](scenarios/README-webprotect.md)
+- [OIDC authentication](scenarios/README-oidc.md)
+- [Distributed tracing](scenarios/README-trace.md)
+- [MCP gateway](scenarios/README-mcp.md)
 
 ## 📚 Resources
 

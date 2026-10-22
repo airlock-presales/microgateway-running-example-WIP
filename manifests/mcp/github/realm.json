@@ -1,0 +1,61 @@
+{
+  "realm": "mcp",
+  "enabled": true,
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "mcp-demo",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:6274/oauth/callback",
+        "http://127.0.0.1:6274/oauth/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:6274",
+        "http://127.0.0.1:6274"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "basic",
+        "profile",
+        "email"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "user1",
+      "email": "user1@example.org",
+      "emailVerified": true,
+      "firstName": "Alice",
+      "lastName": "Demo",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "user2",
+      "email": "user2@airlock.com",
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Demo",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "uid": "airlock-mcp-routing",
+  "title": "Airlock Microgateway MCP Routing",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "MCP requests by method",
+      "type": "timeseries",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (mcp_method) (count_over_time({container=\"airlock-microgateway-engine\"} |= \"envoy.access\" | json | airlock_route_namespace = \"mcp\" | mcp_method != \"\" [$__auto]))",
+          "legendFormat": "{{mcp_method}}{{mcp_tool_name}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Tool calls by tool",
+      "type": "timeseries",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (mcp_tool_name) (count_over_time({container=\"airlock-microgateway-engine\"} |= \"envoy.access\" | json | airlock_route_namespace = \"mcp\" | mcp_tool_name != \"\" [$__auto]))",
+          "legendFormat": "{{mcp_method}}{{mcp_tool_name}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "MCP access log (method, tool, route and optional identity)",
+      "type": "logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{container=\"airlock-microgateway-engine\"} |= \"envoy.access\" | json | airlock_route_namespace = \"mcp\" | mcp_method != \"\""
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mcp-gateway-tls
+spec:
+  secretName: mcp-gateway-tls
+  dnsNames:
+    - github-mcp-127-0-0-1.nip.io
+    - auth-127-0-0-1.nip.io
+  issuerRef:
+    name: cluster-ca-issuer
+    kind: ClusterIssuer
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: mcp-https
+spec:
+  parentRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: airlock-gateway
+    namespace: airlock-gateway
+  listeners:
+    - name: mcp-https
+      port: 8443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - {kind: Secret, name: mcp-gateway-tls}
+      allowedRoutes:
+        namespaces:
+          from: Same

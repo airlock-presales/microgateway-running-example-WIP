@@ -1,0 +1,40 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: github-mcp
+spec:
+  parentRefs:
+    - name: mcp-https
+      kind: ListenerSet
+      namespace: mcp
+      sectionName: mcp-https
+  hostnames:
+    - github-mcp-127-0-0-1.nip.io
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: www-authenticate
+                value: Bearer resource_metadata="https://github-mcp-127-0-0-1.nip.io:8443/.well-known/oauth-protected-resource/mcp"
+        - type: CORS
+          cors:
+            allowHeaders:
+              - "*"
+            allowMethods:
+              - "*"
+            allowOrigins:
+              - "http://localhost:6274"
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: Authorization
+                value: "Bearer github_pat_xxxxxxx"
+      backendRefs:
+        - name: github-mcp
+          port: 443

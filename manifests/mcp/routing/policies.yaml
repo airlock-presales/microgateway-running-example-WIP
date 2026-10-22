@@ -1,0 +1,44 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: mcp-echo
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-echo}
+  envoyHTTPFilterRefs:
+    prepend:
+      - name: mcp-parser
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: mcp-math
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-math}
+  envoyHTTPFilterRefs:
+    prepend:
+      - name: mcp-parser
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: mcp-dynamic
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-dynamic}
+  envoyHTTPFilterRefs:
+    prepend:
+      - name: mcp-parser
+---
+# The routing lab does not depend on the shared WAAP/session defaults.
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: ContentSecurityPolicy
+metadata:
+  name: mcp-routing
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-echo}
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-math}
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: mcp-dynamic}
+  unsecured: {}
