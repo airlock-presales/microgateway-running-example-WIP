@@ -1,3 +1,11 @@
 **/.local
 microgateway-license.txt
 *lokistack*
+
+# MCP: private credentials, certificates and local helper state
+**/.local/
+**/__pycache__/
+*.pyc
+**/charts/
+.dockerconfigjson
+*license*.txt

@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: mcp
+spec:
+  serviceName: mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mariadb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mariadb
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: mariadb
+        image: docker.io/mariadb:11.4.4
+        env:
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-credentials
+              key: root-password
+        - name: MARIADB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-credentials
+              key: database
+        - name: MARIADB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-credentials
+              key: username
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-credentials
+              key: password
+        ports:
+        - name: mysql
+          containerPort: 3306
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+        - name: schema
+          mountPath: /docker-entrypoint-initdb.d/10-create-medusa-schema.sql
+          subPath: create-medusa-schema.sql
+        - name: schema
+          mountPath: /docker-entrypoint-initdb.d/20-insert-admin.sql
+          subPath: insert-admin.sql
+        readinessProbe:
+          exec:
+            command:
+            - healthcheck.sh
+            - --connect
+            - --innodb_initialized
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        args:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_520_nopad_ci
+      volumes:
+      - name: schema
+        configMap:
+          name: iam-database-schema
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi

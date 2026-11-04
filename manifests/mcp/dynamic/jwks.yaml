@@ -1,0 +1,8 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: JWKS
+metadata:
+  name: airlock-iam-dynamic
+spec:
+  provider:
+    remote:
+      uri: http://airlock-iam.mcp.svc.cluster.local:8080/auth-login/rest/oauth2/authorization-servers/mcp-dynamic/jwks

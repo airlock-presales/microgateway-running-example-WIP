@@ -1,0 +1,1908 @@
+schemaVersion: iam.airlock.com/v1
+type: IamConfig
+metadata:
+  iamVersion: '8.7'
+  history:
+  - datetime: 2026-11-04 13:00:47.810000+00:00
+    author: UpdateTool
+    comment: Automatic update to version 8.7
+  - datetime: 2026-11-04 13:00:47.543000+00:00
+    author: UpdateTool
+    comment: Automatic update to version 8.6
+spec:
+- type: GlobalConfiguration
+  id: mainSettings
+  displayName: globalConfig
+  properties:
+    authenticationSettings:
+      type: GlobalAuthenticationSettings
+      id: authSettings
+      displayName: Main Authentication Settings
+    dataSources:
+      type: GlobalPersisterSettings
+      id: dataSources
+      displayName: Data sources
+      properties:
+        acceptedSsoTicketRepository:
+          type: PersistentAcceptedSsoTicketRepository
+          id: ssoTicketRepo
+          properties:
+            sqlDataSource:
+              type: JdbcConnectionPool
+              id: sqlConnection
+              displayName: MariaDB Connection
+              properties:
+                driverClass:
+                - value: org.mariadb.jdbc.Driver
+                  var:
+                    name: IAM_DB_DRIVER_CLASS
+                password:
+                - var:
+                    name: IAM_DB_PASSWORD
+                    sensitive: true
+                  value: '[FILE]/etc/iam-database-secret/password'
+                url:
+                - value: jdbc:mariadb://mariadb.mcp.svc.cluster.local:3306/airlockiam
+                  var:
+                    name: IAM_DB_URL
+                user:
+                - value: airlockiam
+                  var:
+                    name: IAM_DB_USER
+        tokenDataSource:
+          type: DefaultTokenDataProvider
+          id: tokenData
+          displayName: Token Data Provider
+          properties:
+            tokenPersister:
+              type: DatabaseTokenPersister
+              id: tokenPersister
+              displayName: Database Token Persister
+              properties:
+                sqlDataSource:
+                  ref: sqlConnection
+                tokenAssignmentColAdditionalInformation: ta_additional_information
+                tokenAssignmentColAssignmentDate: ta_assignment_date
+                tokenAssignmentColAssignmentUser: ta_assignment_user
+                tokenAssignmentColComment: ta_comment
+                tokenAssignmentColOrderNew: ta_order_new
+                tokenAssignmentColOrderNewDate: ta_order_new_date
+                tokenAssignmentColOrderNewUser: ta_order_new_user
+                tokenAssignmentColOrderOptions: ta_order_options
+                tokenAssignmentColTokenId: ta_token_id
+                tokenAssignmentColUser: ta_user
+                tokenAssignmentTable: token_assignment
+                tokenColActivatesTokenId: activates_token_id
+                tokenColActivationDate: activation_date
+                tokenColActive: active
+                tokenColFirstUsageDate: first_usage_date
+                tokenColGenerationDate: generation_date
+                tokenColGenericDataElement1: generic_data_element_1
+                tokenColGenericDataElement10: generic_data_element_10
+                tokenColGenericDataElement11: generic_data_element_11
+                tokenColGenericDataElement12: generic_data_element_12
+                tokenColGenericDataElement2: generic_data_element_2
+                tokenColGenericDataElement3: generic_data_element_3
+                tokenColGenericDataElement4: generic_data_element_4
+                tokenColGenericDataElement5: generic_data_element_5
+                tokenColGenericDataElement6: generic_data_element_6
+                tokenColGenericDataElement7: generic_data_element_7
+                tokenColGenericDataElement8: generic_data_element_8
+                tokenColGenericDataElement9: generic_data_element_9
+                tokenColLatestUsageDate: latest_usage_date
+                tokenColObsoletesTokenId: obsoletes_token_id
+                tokenColSerialId: serial_id
+                tokenColTokenData: token_data
+                tokenColTokenId: token_id
+                tokenColTotalUsages: total_usages
+                tokenColTrackingId: tracking_id
+                tokenColType: type
+                tokenColValidityRangeLower: validity_range_lower
+                tokenColValidityRangeUpper: validity_range_upper
+                tokenTable: token
+        userStore:
+          type: DatabaseUserStoreProvider
+          id: userStore
+          properties:
+            databaseUserPersister:
+              type: DatabaseUserPersister
+              id: userPersister
+              displayName: Users on Database
+              properties:
+                colAuthMethod: auth_method
+                colAuthMigrationDate: auth_migration_date
+                colChannelVerificationResends: channel_verification_resends
+                colFailedLogins: failed_logins
+                colFailedLoginsBeforeLatestLogin: failed_logins_before
+                colFailedPasswordResets: pwd_failed_resets
+                colFailedTokenCounts: failed_token_counts
+                colFirstLogin: first_login
+                colLastGSID: last_gsid_value
+                colLastGSIDDate: last_gsid_date
+                colLatestLoginAttempt: lat_login_attempt
+                colLatestPasswordChange: pwd_lat_chg
+                colLatestSuccessfulLogin: lat_succ_login
+                colLatestUnlockAttempt: lat_unlock_attempt
+                colNextAuthMethod: next_auth_method
+                colNextEnforcedPasswordChange: pwd_next_chg
+                colPassword: pwd_hash
+                colPasswordChangeForced: pwd_chg_enf
+                colPasswordDeliveryDate: pwd_lat_del
+                colPasswordGenerationDate: pwd_lat_gen
+                colPasswordOrderedDate: pwd_order_date
+                colPasswordOrderedFlag: pwd_order_new
+                colPasswordOrderedUser: pwd_order_user
+                colRecordInsertionDate: rowInsertDate
+                colRecordInsertionUser: rowInsertUser
+                colRecordModificationDate: rowUpdateDate
+                colRecordModificationUser: rowUpdateUser
+                colRoleString: roles
+                colSecondLatestSuccessfulLogin: lat_succ_login2
+                colSecretQuestionsEnabled: secret_questions_enabled
+                colSelfRegisteredFlag: self_registered
+                colSelfRegistrationDate: self_registration_date
+                colTotalLogins: total_logins
+                colUnlockAttempts: unlock_attempts
+                colUserLockDate: lock_date
+                colUserLockReason: lock_reason
+                colUserLocked: locked
+                colUserName: username
+                colUserNotValidAfter: not_valid_after
+                colUserNotValidBefore: not_valid_before
+                colUserValid: valid
+                colVersionId: rowVersionId
+                contextDataColumns:
+                - pluginList:
+                  - type: StringContextDataItem
+                    id: ctxDataItemSalutation
+                    displayName: Context Data Item 'salutation'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameSalutation
+                        displayName: String Context Data 'salutation'
+                        properties:
+                          contextDataName: salutation
+                  - type: StringContextDataItem
+                    id: ctxDataItemGivenname
+                    displayName: Context Data Item 'givenname'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameGivenname
+                        displayName: String Context Data 'givenname'
+                        properties:
+                          contextDataName: givenname
+                  - type: StringContextDataItem
+                    id: ctxDataItemSurname
+                    displayName: Context Data Item 'surname'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameSurname
+                        displayName: String Context Data 'surname'
+                        properties:
+                          contextDataName: surname
+                  - type: StringContextDataItem
+                    id: ctxDataItemStreet
+                    displayName: Context Data Item 'street'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameStreet
+                        displayName: String Context Data 'street'
+                        properties:
+                          contextDataName: street
+                  - type: StringContextDataItem
+                    id: ctxDataItemStreetNumber
+                    displayName: Context Data Item 'streetNumber'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameStreetNumber
+                        displayName: String Context Data 'streetNumber'
+                        properties:
+                          contextDataName: streetNumber
+                  - type: StringContextDataItem
+                    id: ctxDataItemAddress2
+                    displayName: Context Data Item 'address2'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameAddress2
+                        displayName: String Context Data 'address2'
+                        properties:
+                          contextDataName: address2
+                  - type: StringContextDataItem
+                    id: ctxDataItemZip
+                    displayName: Context Data Item 'zipcode'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameZip
+                        displayName: String Context Data 'zipcode'
+                        properties:
+                          contextDataName: zipcode
+                  - type: StringContextDataItem
+                    id: ctxDataItemTown
+                    displayName: Context Data Item 'town'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameTown
+                        displayName: String Context Data 'town'
+                        properties:
+                          contextDataName: town
+                  - type: StringContextDataItem
+                    id: ctxDataItemState
+                    displayName: Context Data Item 'state'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameState
+                        displayName: String Context Data 'state'
+                        properties:
+                          contextDataName: state
+                  - type: StringContextDataItem
+                    id: ctxDataItemCountry
+                    displayName: Context Data Item 'country'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameCountry
+                        displayName: String Context Data 'country'
+                        properties:
+                          contextDataName: country
+                  - type: StringContextDataItem
+                    id: ctxDataItemCompany
+                    displayName: Context Data Item 'company'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameCompany
+                        displayName: String Context Data 'company'
+                        properties:
+                          contextDataName: company
+                  - type: StringContextDataItem
+                    id: ctxDataItemEmail
+                    displayName: Context Data Item 'email'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameEmail
+                        displayName: String Context Data 'email'
+                        properties:
+                          contextDataName: email
+                  - type: StringContextDataItem
+                    id: ctxDataItemLang
+                    displayName: Context Data Item 'language'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameLang
+                        displayName: String Context Data 'language'
+                        properties:
+                          contextDataName: language
+                  - type: DateContextDataItem
+                    id: ctxDataItemBirthdate
+                    displayName: Context Data Item 'birthdate'
+                    properties:
+                      contextDataName:
+                        type: DateContextDataItemName
+                        id: ctxDataItemNameBirthdate
+                        displayName: Date Context Data 'birthdate'
+                        properties:
+                          contextDataName: birthdate
+                  - type: StringContextDataItem
+                    id: ctxDataItemDisclaimerTag
+                    displayName: Context Data Item 'disclaimer_tag'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameDisclaimerTag
+                        displayName: String Context Data 'disclaimer_tag'
+                        properties:
+                          contextDataName: disclaimer_tag
+                  - type: StringContextDataItem
+                    id: ctxDataItemAuthMethod
+                    displayName: Context Data Item 'auth_method'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameAuthMethod
+                        displayName: String Context Data 'auth_method'
+                        properties:
+                          contextDataName: auth_method
+                  - type: StringContextDataItem
+                    id: ctxDataItemUsername
+                    displayName: Context Data Item 'username'
+                    properties:
+                      contextDataName:
+                        type: StringContextDataItemName
+                        id: ctxDataItemNameUsername
+                        displayName: String Context Data 'username'
+                        properties:
+                          contextDataName: username
+                      readonlyOnUpdate: 'true'
+                isPwdHashStringType: 'true'
+                recordModificationUser: AirlockIAM
+                sqlDataSource:
+                  ref: sqlConnection
+                userChangeEventListeners:
+                - pluginList:
+                  - type: TokenConsistencyUserChangeListener
+                    id: tokenConsistencyUserChangeListener
+                    displayName: Default Token Consistency User Change Listener
+                    properties:
+                      tokenServices:
+                      - pluginList:
+                        - type: GenericTokenService
+                          id: genericUserTokenService
+                          displayName: Generic Token Service
+                  - type: LoginHistoryConsistencyUserChangeListener
+                    id: loginHistoryConsistencyListener
+                    displayName: Login History Consistency Listener
+                    properties:
+                      loginHistoryRepository:
+                        type: DatabaseLoginHistoryRepository
+                        id: loginHistoryRepo
+                        displayName: Login History Respository
+                        properties:
+                          sqlDataSource:
+                            ref: sqlConnection
+                  - type: RememberMeConsistencyUserChangeListener
+                    id: rememberMeConsistencyListener
+                    displayName: Remember-Me Consistency User Change Listener
+                    properties:
+                      rememberMeSettings:
+                        type: RememberMe
+                        id: rememberMeSettings
+                        properties:
+                          repository:
+                            type: RememberMeRepository
+                            id: rememberMeRepo
+                            properties:
+                              sqlDataSource:
+                                ref: sqlConnection
+                userTableName: medusa_user
+        userTrailDataSource:
+          type: UserTrailLogRepository
+          id: userTrailLogRepo
+          displayName: User Trail Log Repository
+          properties:
+            sqlDataSource:
+              ref: sqlConnection
+    passwordSettings:
+      type: PasswordSettings
+      id: pwdSettings
+      displayName: Password Settings
+      properties:
+        adminMayGeneratePassword: 'true'
+        adminMaySetPassword: 'true'
+        mayBeSelectedAsAuthMethod: 'true'
+        passwordGenerator:
+          type: ExtendedStringGenerator
+          id: userPwdGenerator
+          displayName: User Password Generator
+          properties:
+            passwordPolicy:
+              type: SimplePasswordPolicy
+              id: userPwdPolicy
+              displayName: Default Password Policy for Users
+              properties:
+                maxAllowedLength: '100'
+                minRequiredLength: '8'
+                noPreviouslyUsedPasswords: 'true'
+                requiredCharacters: CHARS_AND_DIGITS
+            pattern: '{distinct:12}'
+        passwordPolicy:
+          ref: userPwdPolicy
+        passwordService:
+          type: PersisterPasswordService
+          id: userPwdService
+          displayName: Password Service for Users
+          properties:
+            hashFunction:
+              type: PasswordHistoryHash
+              id: pwdHash
+              displayName: History Password Hash
+              properties:
+                passwordHash:
+                  type: ScryptPasswordHash
+                  id: scryptPwdHash
+    stateRepository:
+      type: InMemoryStateRepository
+      id: stateRepo
+- type: Loginapp
+  id: loginapp
+  displayName: loginapp
+  properties:
+    authenticationFlows:
+      type: TargetApplications
+      id: applications
+      properties:
+        defaultApplication:
+          type: TargetApplication
+          id: demoApp
+          displayName: Demo Application
+          properties:
+            applicationId:
+              type: ApplicationId
+              id: demoApplicationId
+              displayName: Application ID "demo"
+              properties:
+                applicationId: demo
+            authenticationFlow:
+              type: AuthenticationFlow
+              id: authFlow-usernamePassword
+              displayName: Username Password Authentication Flow
+              properties:
+                steps:
+                - pluginList:
+                  - type: RememberMeUserIdentifyingStep
+                    id: rememberMeIdentStep
+                    displayName: Remember-Me User Identification
+                    properties:
+                      tagsOnSuccess:
+                      - pluginList:
+                        - type: TagConfigImpl
+                          id: weakAuthenticated
+                          displayName: Weak Authentication Tag
+                          properties:
+                            name: WEAK_AUTHENTICATION
+                  - type: UsernamePasswordAuthenticationStep
+                    id: usernamePwdAuthStep
+                    displayName: Username Password Authentication Step
+                    properties:
+                      dynamicStepActivations:
+                      - pluginList:
+                        - type: DynamicStepActivation
+                          id: rememberMeStepActivation
+                          displayName: Remember-Me
+                          properties:
+                            targetStepId:
+                              type: StepId
+                              id: rememberMeTokenGeneratingStepId
+                              displayName: Remember-Me Token Generating Step ID "generate-remember-me-token"
+                              properties:
+                                id: generate-remember-me-token
+                        - type: DynamicStepActivation
+                          id: passwordChangeStepActivation
+                          displayName: Voluntary Password Change
+                          properties:
+                            targetStepId:
+                              type: StepId
+                              id: voluntaryPwdChangeStepId
+                              displayName: Voluntary Password Change Step ID "voluntary-password-change"
+                              properties:
+                                id: voluntary-password-change
+                      passwordAttributeKey: PASSWORD
+                      passwordRepository:
+                        type: InMemoryPasswordRepository
+                        id: inMemoryPwdRepo
+                        properties:
+                          hashFunction:
+                            ref: pwdHash
+                      policyToCheckOnLogin:
+                        ref: userPwdPolicy
+                      skipCondition:
+                        type: TagCondition
+                        id: hasWeakAuthTag
+                        displayName: Has Weak Authentication Tag
+                        properties:
+                          tag:
+                            ref: weakAuthenticated
+                      stepId:
+                        type: StepId
+                        id: usernamePwdAuthStepId
+                        displayName: Password Authentication Step ID "pwcheck"
+                        properties:
+                          id: pwcheck
+                      tagsOnSuccess:
+                      - pluginList:
+                        - type: TagConfigImpl
+                          id: passwordVerified
+                          displayName: Password Verified Tag
+                          properties:
+                            name: PASSWORD_VERIFIED
+                        - ref: weakAuthenticated
+                  - type: SelectionStep
+                    id: pwdChangeSelectionStep
+                    displayName: Password Change Selection
+                    properties:
+                      availableOptions:
+                      - pluginList:
+                        - type: SelectionOption
+                          id: mandatoryPwdChangeSelectionOption
+                          displayName: Mandatory Password Change Selection Option
+                          properties:
+                            condition:
+                              type: RedFlagCondition
+                              id: mandatoryPwdChangeRedFlagRaised
+                              displayName: Mandatory Password Change Red Flag
+                              properties:
+                                redFlag:
+                                  type: MandatoryPasswordChangeRedFlag
+                                  id: mandatoryPwdChangeRedFlag
+                            name: MANDATORY_PASSWORD_CHANGE
+                            steps:
+                            - pluginList:
+                              - type: MandatoryPasswordChangeStep
+                                id: mandatoryPwdCheckStep
+                                displayName: Mandatory Password Change
+                                properties:
+                                  oldPasswordAttempts: '3'
+                                  oldPasswordRequired: 'false'
+                                  passwordAttributeKey: PASSWORD
+                                  passwordPolicy:
+                                    ref: userPwdPolicy
+                                  passwordRepository:
+                                    ref: inMemoryPwdRepo
+                      fallbackFlow:
+                      - pluginList:
+                        - type: VoluntaryPasswordChangeStep
+                          id: voluntaryPwdChangeStep
+                          displayName: Voluntary Password Change Step for Authentication
+                          properties:
+                            oldPasswordAttempts: '3'
+                            oldPasswordRequired: 'false'
+                            passwordAttributeKey: PASSWORD
+                            passwordPolicy:
+                              ref: userPwdPolicy
+                            passwordRepository:
+                              ref: inMemoryPwdRepo
+                            requiresActivation: 'true'
+                            stepId:
+                              ref: voluntaryPwdChangeStepId
+                  - type: RememberMeTokenGeneratingStep
+                    id: rememberMeTokenGeneratingStep
+                    displayName: Remember-Me Token Generation
+                    properties:
+                      stepId:
+                        ref: rememberMeTokenGeneratingStepId
+                  - type: LoginFromNewDeviceStep
+                    id: loginFromNewDeviceStep
+                    displayName: Login From New Device
+                    properties:
+                      cookieSettings:
+                        type: NewDeviceCookie
+                        id: loginFromNewDeviceCookie
+                        properties:
+                          key:
+                          - var:
+                              name: IAM_DEVICE_COOKIE_KEY
+                              sensitive: true
+                            value: '[FILE]/etc/iam-secrets/device-cookie-key'
+                          validity: 365d
+                  - type: OAuth2ConsentStep
+                    id: mcpDemoOidcConsentStep
+                    displayName: MCP OIDC Consent
+                usernameTransformers:
+                - pluginList:
+                  - type: ContextDataUsernameTransformer
+                    id: loginWithEmailAddressUsernameTransformer
+                    displayName: Login with email address
+                    properties:
+                      contextDataColumns:
+                      - valueList:
+                        - email
+            identityPropagation:
+            - pluginList:
+              - type: OAuth2IdentityPropagator
+                id: mcpOidcIdentityPropagator
+            usernameToPropagateProvider:
+              type: UserPrincipalNameProvider
+              id: usernameProvider
+        rememberMeConfig:
+          ref: rememberMeSettings
+        temporaryLockingConfig:
+          type: TemporaryLocking
+          id: tempLocking
+          displayName: Temporary Locking
+          properties:
+            temporaryLockingStrategyConfig:
+              type: ExponentialTemporaryLockingStrategy
+              id: expTempLockingStrategy
+    eventSettings:
+      type: LoginappEventSettings
+      id: loginappEventSettings
+      properties:
+        eventSubscribers:
+        - pluginList:
+          - type: LoginappEmailEventSubscriber
+            id: loginappEmailEventSubscriber
+            displayName: Email Event Subscriber for User Locked (Loginapp)
+            properties:
+              bodyResourceKey: email.notification.user-locked-event.body
+              emailService:
+                type: DummyEmailService
+                id: dummyEmailService
+              event:
+                type: UserLockedSubscribedEvent
+                id: userLockedEvent
+              language:
+                type: ContextDataStringValueProvider
+                id: userLangProvider
+                displayName: Existing Language
+                properties:
+                  contextDataField:
+                    ref: ctxDataItemNameLang
+              recipientAddress:
+                type: StringProviderRecipient
+                id: eventEmailRecipientFromString
+                properties:
+                  stringProvider:
+                    type: ContextDataStringValueProvider
+                    id: userEmailProvider
+                    displayName: Existing Email
+                    properties:
+                      contextDataField:
+                        ref: ctxDataItemNameEmail
+              subjectResourceKey: email.notification.user-locked-event.subject
+              valueMapProviders:
+              - pluginList:
+                - type: ContextDataValueMapProvider
+                  id: userContextDataMap
+          - type: LoginappEmailEventSubscriber
+            id: loginappLoggedInFromNewDeviceEventSubscriber
+            displayName: Email Event Subscriber for Login From New Device (Loginapp)
+            properties:
+              bodyResourceKey: email.notification.login-from-new-device-event.body
+              emailService:
+                ref: dummyEmailService
+              event:
+                type: LoggedInFromNewDeviceEvent
+                id: loggedInFromNewDeviceEvent
+              language:
+                ref: userLangProvider
+              recipientAddress:
+                ref: eventEmailRecipientFromString
+              sendAsHtml: 'true'
+              subjectResourceKey: email.notification.login-from-new-device-event.subject
+              valueMapProviders:
+              - pluginList:
+                - ref: userContextDataMap
+    gatewaySettings:
+      type: AirlockMicrogateway
+      id: airlockMicrogatewayLoginapp
+      displayName: Airlock Microgateway Settings (Loginapp)
+      properties:
+        clientIpExtractor:
+          type: ClientIpExtractor
+          id: microgatewayClientIpExtractorLoginapp
+          properties:
+            httpHeaderName: X-Forwarded-For
+            ignorePrivateIpAddresses: 'false'
+        requestIdExtractor:
+          type: RequestIdExtractor
+          id: microgatewayRequestIdExtractorLoginapp
+          properties:
+            httpHeaderName: X-Request-ID
+        requestUrlExtractor:
+          type: RequestUrlExtractor
+          id: microgatewayRequestUrlExtractorLoginapp
+          properties:
+            httpHeaderName: X-URL
+    languageSettings:
+      type: LanguageSettings
+      id: languageSettings
+      properties:
+        defaultLanguage: de
+    maintenanceMessages:
+      type: MaintenanceMessage
+      id: maintMsgSettings
+      displayName: Maintenance Message Settings
+      properties:
+        messageService:
+          type: DatabaseMaintenanceMessagePersister
+          id: maintMsgPersister
+          displayName: Maintenance Messages on Database
+          properties:
+            cacheTimeout: '5'
+            messageColActive: active
+            messageColLocation: location
+            messageColName: name
+            messageColRecordInsertionDate: rowInsertDate
+            messageColRecordInsertionUser: rowInsertUser
+            messageColRecordModificationDate: rowUpdateDate
+            messageColRecordModificationUser: rowUpdateUser
+            messageColSystemAvailable: system_available
+            messageColValidFrom: valid_from
+            messageColValidTo: valid_to
+            messageColVersionId: rowVersionId
+            messageTable: medusa_maint_msg
+            sqlDataSource:
+              ref: sqlConnection
+            translationColLanguage: language
+            translationColMessage: message
+            translationColMessageRef: message_ref
+            translationTable: medusa_maint_msg_tnsl
+    oAuth2ASSettings:
+      type: OAuth2AuthorizationServers
+      id: mcpDemoAuthorizationServers
+      displayName: MCP Authorization Servers
+      properties:
+        authorizationServers:
+        - pluginList:
+          - type: OAuth2AS
+            id: mcpDemoAuthorizationServer
+            displayName: MCP OpenID Provider
+            properties:
+              applicationUi:
+                type: OAuth2DefaultSpaApplicationUi
+                id: mcpDemoDefaultApplicationUi
+              deleteTokensOnLogout: SESSION
+              discoveryEndpoint:
+                type: OpenIdConnectDiscoveryEndpoint
+                id: mcpDemoDiscoveryEndpoint
+                properties:
+                  issuerValidationMode: FAIL
+              identifier:
+                type: OAuth2ASIdentifier
+                id: mcpDemoAuthorizationServerIdentifier
+                properties:
+                  identifier: mcp
+              issuerId:
+                type: OAuth2IssuerId
+                id: mcpDemoIssuerId
+                properties:
+                  issuerId: https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp
+              oauth2Grants:
+                type: OAuth2GrantsAndEndpoints
+                id: mcpDemoGrants
+                properties:
+                  oidcAuthorizationCodeGrant:
+                    type: OpenIdConnectAuthorizationCodeGrant
+                    id: mcpDemoAuthorizationCodeFlow
+                    properties:
+                      accessTokenExpiresIn: '300'
+                      accessTokenFormat:
+                        type: JwtAccessTokenFormat
+                        id: mcpAccessTokenFormat
+                        properties:
+                          audience:
+                          - valueList:
+                            - https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp
+                          customClaims:
+                          - pluginList:
+                            - type: CustomContextDataStringClaim
+                              id: mcpEmailClaim
+                              properties:
+                                claimName: email
+                                contextDataName:
+                                  ref: ctxDataItemNameEmail
+                          includeSubjectClaim: 'true'
+                          issuer: https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp
+                          signature:
+                            type: JwtAccessTokenPrivateKeySignature
+                            id: mcpAccessTokenSigner
+                            properties:
+                              algorithm: RS256
+                              keystoreFile: instances/auth/keystores/oidc-signing.p12
+                              keystorePassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                              signingKeyAlias: mcp
+                              signingKeyPassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                      allowEmptyScope: 'true'
+                      alwaysGrantedScopes:
+                      - valueList:
+                        - profile
+                        - email
+                      authorizationCodeExpiresIn: '90'
+                      enableHybridFlow: 'false'
+                      flowApplicationId:
+                        ref: demoApplicationId
+                      generateRefreshToken: 'false'
+                      idToken:
+                        type: OpenIdConnectIdToken
+                        id: mcpDemoIdToken
+                        properties:
+                          signer:
+                            type: OpenIDConnectIDTokenPrivateKeySignatureSigner
+                            id: mcpDemoIdTokenSigner
+                            properties:
+                              algorithm: RS256
+                              keystoreFile: instances/auth/keystores/oidc-signing.p12
+                              keystorePassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                              signingKeyAlias: mcp
+                              signingKeyPassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                      openIdConnectTokenExpiresIn: '300'
+                      pkceCodeChallengeMethod: S256
+                      scopePolicy: EMPTY_SCOPES_ALLOWED
+              sessionRepository:
+                type: OAuth2SessionRepository
+                id: mcpDemoSessionRepository
+                properties:
+                  logQueries: 'false'
+                  sqlDataSource:
+                    ref: sqlConnection
+                  tokenAssignmentTableName: token_assignment
+                  tokenTableName: token
+              staticClients:
+                type: OAuth2StaticClients
+                id: mcpDemoStaticClients
+                properties:
+                  staticClients:
+                  - pluginList:
+                    - type: OAuth2StaticClient
+                      id: mcpDemoMicrogatewayClient
+                      displayName: MCP Microgateway
+                      properties:
+                        allowedScopes:
+                        - valueList:
+                          - profile
+                          - email
+                        clientId: mcp-demo
+                        clientName: MCP Inspector draft
+                        filterRequestedScopes: 'true'
+                        flowApplicationId:
+                          ref: demoApplicationId
+                        pkceCodeChallengeMethodOverride: DEFAULT
+                        redirectUris:
+                        - valueList:
+                          - http://localhost:6274/oauth/callback
+                          - http://127.0.0.1:6274/oauth/callback
+              tokenDataProvider:
+                ref: tokenData
+              tokenEndpoint:
+                type: OAuth2TokenEndpoint
+                id: mcpDemoTokenEndpoint
+                properties:
+                  bindAccessTokens: 'false'
+                  clientAuthentication:
+                    type: OAuth2NoClientAuthentication
+                    id: mcpPublicClientAuthentication
+              userStore:
+                ref: userStore
+          - type: OAuth2AS
+            id: mcpDemoAuthorizationServerDynamic
+            displayName: MCP OpenID Provider Dynamic
+            properties:
+              applicationUi:
+                type: OAuth2DefaultSpaApplicationUi
+                id: mcpDemoDefaultApplicationUiDynamic
+              deleteTokensOnLogout: SESSION
+              discoveryEndpoint:
+                type: OpenIdConnectDiscoveryEndpoint
+                id: mcpDemoDiscoveryEndpointDynamic
+                properties:
+                  issuerValidationMode: FAIL
+              identifier:
+                type: OAuth2ASIdentifier
+                id: mcpDemoAuthorizationServerIdentifierDynamic
+                properties:
+                  identifier: mcp-dynamic
+              issuerId:
+                type: OAuth2IssuerId
+                id: mcpDemoIssuerIdDynamic
+                properties:
+                  issuerId: https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp-dynamic
+              oauth2Grants:
+                type: OAuth2GrantsAndEndpoints
+                id: mcpDemoGrantsDynamic
+                properties:
+                  oidcAuthorizationCodeGrant:
+                    type: OpenIdConnectAuthorizationCodeGrant
+                    id: mcpDemoAuthorizationCodeFlowDynamic
+                    properties:
+                      accessTokenExpiresIn: '300'
+                      accessTokenFormat:
+                        type: JwtAccessTokenFormat
+                        id: mcpAccessTokenFormatDynamic
+                        properties:
+                          audience:
+                          - valueList:
+                            - https://mcp-iam-127-0-0-1.nip.io:8443/mcp
+                          customClaims:
+                          - pluginList:
+                            - type: CustomContextDataStringClaim
+                              id: mcpEmailClaimDynamic
+                              properties:
+                                claimName: email
+                                contextDataName:
+                                  ref: ctxDataItemNameEmail
+                          includeSubjectClaim: 'true'
+                          issuer: https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp-dynamic
+                          signature:
+                            type: JwtAccessTokenPrivateKeySignature
+                            id: mcpAccessTokenSignerDynamic
+                            properties:
+                              algorithm: RS256
+                              keystoreFile: instances/auth/keystores/oidc-signing.p12
+                              keystorePassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                              signingKeyAlias: mcp
+                              signingKeyPassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                      allowEmptyScope: 'true'
+                      alwaysGrantedScopes:
+                      - valueList:
+                        - profile
+                        - email
+                      authorizationCodeExpiresIn: '90'
+                      enableHybridFlow: 'false'
+                      flowApplicationId:
+                        ref: demoApplicationId
+                      generateRefreshToken: 'false'
+                      idToken:
+                        type: OpenIdConnectIdToken
+                        id: mcpDemoIdTokenDynamic
+                        properties:
+                          signer:
+                            type: OpenIDConnectIDTokenPrivateKeySignatureSigner
+                            id: mcpDemoIdTokenSignerDynamic
+                            properties:
+                              algorithm: RS256
+                              keystoreFile: instances/auth/keystores/oidc-signing.p12
+                              keystorePassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                              signingKeyAlias: mcp
+                              signingKeyPassword:
+                              - var:
+                                  name: IAM_OIDC_KEYSTORE_PASSWORD
+                                  sensitive: true
+                                value: '[FILE]/etc/iam-secrets/keystore-password'
+                      openIdConnectTokenExpiresIn: '300'
+                      pkceCodeChallengeMethod: S256
+                      scopePolicy: EMPTY_SCOPES_ALLOWED
+              sessionRepository:
+                type: OAuth2SessionRepository
+                id: mcpDemoSessionRepositoryDynamic
+                properties:
+                  logQueries: 'false'
+                  sqlDataSource:
+                    ref: sqlConnection
+                  tokenAssignmentTableName: token_assignment
+                  tokenTableName: token
+              staticClients:
+                type: OAuth2StaticClients
+                id: mcpDemoStaticClientsDynamic
+                properties:
+                  staticClients:
+                  - pluginList:
+                    - type: OAuth2StaticClient
+                      id: mcpDemoMicrogatewayClientDynamic
+                      displayName: MCP Microgateway Dynamic
+                      properties:
+                        allowedScopes:
+                        - valueList:
+                          - profile
+                          - email
+                        clientId: mcp-dynamic-demo
+                        clientName: Dynamic MCP Inspector
+                        filterRequestedScopes: 'true'
+                        flowApplicationId:
+                          ref: demoApplicationId
+                        pkceCodeChallengeMethodOverride: DEFAULT
+                        redirectUris:
+                        - valueList:
+                          - http://localhost:6274/oauth/callback
+                          - http://127.0.0.1:6274/oauth/callback
+              tokenDataProvider:
+                ref: tokenData
+              tokenEndpoint:
+                type: OAuth2TokenEndpoint
+                id: mcpDemoTokenEndpointDynamic
+                properties:
+                  bindAccessTokens: 'false'
+                  clientAuthentication:
+                    type: OAuth2NoClientAuthentication
+                    id: mcpPublicClientAuthenticationDynamic
+              userStore:
+                ref: userStore
+    securitySettings:
+      type: SecuritySettings
+      id: loginapSecuritySettings
+      properties:
+        encryptionKey:
+        - var:
+            name: IAM_LOGIN_ENCRYPTION_KEY
+            sensitive: true
+          value: '[FILE]/etc/iam-secrets/login-encryption-key'
+        hmacKey:
+        - var:
+            name: IAM_LOGIN_HMAC_KEY
+            sensitive: true
+          value: '[FILE]/etc/iam-secrets/login-hmac-key'
+        corsSettings:
+          type: CorsSettings
+          id: mcpInspectorCors
+          properties:
+            allowedOrigins:
+            - valueList:
+              - ^http://localhost:6274$
+              - ^http://127\.0\.0\.1:6274$
+              - ^https://iam-mcp-127-0-0-1\.nip\.io:8443$
+            strictCorsValidation: true
+    ui:
+      type: LoginappUi
+      id: loginappUiSettings
+      properties:
+        authenticationUi:
+          type: AuthenticationUiConfigs
+          id: authFlowUIs
+          displayName: Authentication Flow UIs
+          properties:
+            flowUis:
+            - pluginList:
+              - type: AuthenticationUi
+                id: demoApplicationUi
+                displayName: Demo Authentication Flow UI
+                properties:
+                  cancellationTarget:
+                    type: SameFlowRedirectTarget
+                    id: sameFlowRedirectTarget
+                  customizedStepUis:
+                  - pluginList:
+                    - type: LinkConfigurationAuthenticationStepUi
+                      id: usernamePwdStepUiLinks
+                      properties:
+                        stepId:
+                          ref: usernamePwdAuthStepId
+                  maintenanceMessageUiSettings:
+                    type: MaintenanceMessageUiSettings
+                    id: maintMsgUi
+                    displayName: Maintenance Message Flow Settings
+                  targetApplicationId:
+                    ref: demoApplicationId
+                  targetURIResolver:
+                    type: TargetURIResolver
+                    id: mcpDemoRedirectTarget
+                    displayName: Redirect to MCP by Default
+                    properties:
+                      allowedURIs:
+                      - valueList:
+                        - /(?!/).*
+                      defaultValue: /auth-login/
+            nonFlowUiSettings:
+              type: NonFlowAuthenticationUi
+              id: nonFlowUiSettings
+              properties:
+                maintenanceMessageUi:
+                  ref: maintMsgUi
+            onLogout:
+              type: RedirectOnLogout
+              id: redirectAfterLogout
+              properties:
+                target:
+                  type: ParameterBasedTargetUri
+                  id: urlParmTargetUri
+                  properties:
+                    queryParameterUriExtractor:
+                      type: QueryParameterURIValueExtractor
+                      id: locationUrlParameter
+                      properties:
+                        allowedUriPatterns:
+                        - valueList:
+                          - /(?!/).*
+                        parameterName: Location
+        loginRestUiContentSecurityPolicy:
+          type: LoginappUiContentSecurityPolicy
+          id: loginappCsp
+          properties:
+            contentSecurityPolicy: 'default-src ''self''; object-src ''none''; script-src ${cspNonce} ''strict-dynamic''
+              ''self'' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://hcaptcha.com
+              https://*.hcaptcha.com; img-src ''self'' data: https://api.futurae.com; connect-src ''self'' https://api.futurae.com
+              wss://api.futurae.com https://hcaptcha.com https://*.hcaptcha.com; base-uri ''self''; frame-ancestors
+              ''none''; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/ https://hcaptcha.com
+              https://*.hcaptcha.com ''self''; style-src https://hcaptcha.com https://*.hcaptcha.com ''self'';'
+- type: Adminapp
+  id: adminapp
+  displayName: adminapp
+  properties:
+    accessControl:
+      type: RoleBasedAccessControl
+      id: adminappAccessControl
+      displayName: Adminapp Access Control
+      properties:
+        accessServiceContainer: superadmin
+        activateToken: tokenadmin,superadmin
+        applyConfig: superadmin
+        changeAdministratorPassword: NO RESTRICTION
+        createAdministrator: superadmin
+        createEditTechnicalClient: superadmin
+        createUser: useradmin,superadmin
+        deactivateToken: tokenadmin,superadmin
+        deleteAdministrator: superadmin
+        deleteAdministratorPassword: superadmin
+        deleteMaintenanceMessage: sysadmin,superadmin
+        deletePassword: useradmin,superadmin
+        deleteTechnicalClient: superadmin
+        deleteToken: tokenadmin,superadmin
+        deleteUser: useradmin,superadmin
+        editAdministrator: superadmin
+        editConfig: superadmin
+        editMaintenanceMessage: sysadmin,superadmin
+        editToken: tokenadmin,superadmin
+        editUser: useradmin,superadmin
+        editUsername: useradmin,superadmin
+        generateAdministratorPassword: superadmin
+        generatePassword: useradmin,superadmin
+        generateTokenIak: tokenadmin,superadmin
+        listAdministrators: superadmin
+        listMaintenanceMessages: sysadmin,superadmin
+        listUsers: useradmin,tokenadmin,helpdesk,superadmin
+        lockAdministrator: superadmin
+        lockTechnicalClient: superadmin
+        lockUser: useradmin,helpdesk,superadmin
+        manageOAuth2Consents: useradmin,superadmin
+        manageTokens: superadmin
+        orderNewToken: tokenadmin,superadmin
+        orderPassword: useradmin,superadmin
+        restServiceAccessController:
+          type: ResourceAccessController
+          id: adminappRestApiAccessRules
+          displayName: Admin Resource Access Rules
+          properties:
+            allowRules:
+            - pluginList:
+              - type: ResourceAccessControllerAccessRule
+                id: adminappRestApiAllowSmsSend
+                displayName: sendSms
+                properties:
+                  methodPattern: POST
+                  pathPattern: /sms/?
+                  roles: useradmin,superadmin
+              - type: ResourceAccessControllerAccessRule
+                id: adminappRestApiAllowSmsDeliveryStatus
+                displayName: smsDeliveryStatus
+                properties:
+                  methodPattern: GET
+                  pathPattern: /sms/[^/]+/?
+                  roles: useradmin,superadmin
+              - type: ResourceAccessControllerAccessRule
+                id: adminappRestApiAllowPwdCheck
+                displayName: passwordCheck
+                properties:
+                  methodPattern: POST
+                  pathPattern: /users/[^/]+/password/check/?
+                  roles: useradmin,superadmin
+              - type: ResourceAccessControllerAccessRule
+                id: adminappRestApiAllowEnforcePwdChange
+                displayName: enforcePasswordChange
+                properties:
+                  methodPattern: POST,DELETE
+                  pathPattern: /users/[^/]+/password/enforce-change/?
+                  roles: useradmin,superadmin
+        triggerPasswordReset: useradmin,superadmin
+        unlockAdministrator: superadmin
+        unlockTechnicalClient: superadmin
+        unlockUser: useradmin,superadmin
+        unorderNewToken: tokenadmin,superadmin
+        unorderPassword: useradmin,superadmin
+        viewAdministrator: superadmin
+        viewContextData: useradmin,tokenadmin,helpdesk,superadmin
+        viewLicense: superadmin
+        viewLog: sysadmin,superadmin
+        viewTechnicalClients: superadmin
+        viewToken: tokenadmin,helpdesk,superadmin
+        viewUser: useradmin,tokenadmin,helpdesk,superadmin
+        viewUserLogs: useradmin,tokenadmin,helpdesk,superadmin
+    administrators:
+      type: AdministratorsConfiguration
+      id: adminSettings
+      displayName: Administrator Settings
+      properties:
+        administratorsManagement:
+          type: AdministratorsManagement
+          id: adminMgmt
+          displayName: Manage Admins
+          properties:
+            adminUserStore:
+              type: DatabaseUserStoreProvider
+              id: adminUserStore
+              displayName: Admin User Store
+              properties:
+                databaseUserPersister:
+                  type: DatabaseUserPersister
+                  id: adminPersister
+                  displayName: Admins on Database
+                  properties:
+                    colFailedLogins: failed_logins
+                    colFailedLoginsBeforeLatestLogin: failed_logins_before
+                    colFirstLogin: first_login
+                    colLatestLoginAttempt: lat_login_attempt
+                    colLatestPasswordChange: pwd_lat_chg
+                    colLatestSuccessfulLogin: lat_succ_login
+                    colNextEnforcedPasswordChange: pwd_next_chg
+                    colPassword: pwd_hash
+                    colPasswordChangeForced: pwd_chg_enf
+                    colPasswordDeliveryDate: pwd_lat_del
+                    colPasswordGenerationDate: pwd_lat_gen
+                    colPasswordOrderedFlag: pwd_order_new
+                    colRecordInsertionDate: rowInsertDate
+                    colRecordInsertionUser: rowInsertUser
+                    colRecordModificationDate: rowUpdateDate
+                    colRecordModificationUser: rowUpdateUser
+                    colRoleString: roles
+                    colSecondLatestSuccessfulLogin: lat_succ_login2
+                    colTotalLogins: total_logins
+                    colUserLockDate: lock_date
+                    colUserLockReason: lock_reason
+                    colUserLocked: locked
+                    colUserName: username
+                    colUserNotValidAfter: not_valid_after
+                    colUserNotValidBefore: not_valid_before
+                    colVersionId: rowVersionId
+                    contextDataColumns:
+                    - pluginList:
+                      - ref: ctxDataItemGivenname
+                      - ref: ctxDataItemSurname
+                      - ref: ctxDataItemEmail
+                    isPwdHashStringType: 'true'
+                    recordModificationUser: AirlockIAM
+                    sqlDataSource:
+                      ref: sqlConnection
+                    userTableName: medusa_admin
+            assignableRoleCombinations:
+            - valueList:
+              - useradmin
+              - tokenadmin
+              - helpdesk
+              - sysadmin
+              - superadmin
+              - useradmin,tokenadmin
+              - useradmin,sysadmin
+            columnsInAdminList:
+            - pluginList:
+              - type: StringUserProfileItem
+                id: givennameLabel
+                displayName: Givenname Admintool Label
+                properties:
+                  optional: 'false'
+                  propertyName: givenname
+                  stringResourceKey: userdata.label.firstname
+              - type: StringUserProfileItem
+                id: surnameLabel
+                displayName: Surname Admintool Label
+                properties:
+                  optional: 'false'
+                  propertyName: surname
+                  stringResourceKey: userdata.label.lastname
+              - type: EmailUserProfileItem
+                id: adminEmailLabel
+                displayName: Admin Email Admintool Label
+                properties:
+                  checkUniqueness:
+                    ref: adminPersister
+                  propertyName: email
+                  stringResourceKey: userdata.label.email
+            passwordGenerator:
+              type: ExtendedStringGenerator
+              id: adminPwdGenerator
+              displayName: Admin Password Generator
+            passwordHashFunction:
+              ref: pwdHash
+            privilegeEscalationProtectedAdminRoles:
+            - valueList:
+              - superadmin
+            rowsOnAdminDetailPage:
+            - pluginList:
+              - ref: givennameLabel
+              - ref: surnameLabel
+              - ref: adminEmailLabel
+            superAdminRole: superadmin
+        authenticator:
+          type: MainAuthenticator
+          id: adminAuthenticator
+          displayName: Adminapp Authenticator
+          properties:
+            enableStealthMode: 'false'
+            first:
+              type: PasswordServicePasswordAuthenticator
+              id: adminPwdAuthenticator
+              displayName: Admin Password Authenticator
+              properties:
+                passwordSettings:
+                  type: PasswordSettings
+                  id: adminPwdSettings
+                  displayName: Admin Password Settings
+                  properties:
+                    passwordGenerator:
+                      ref: adminPwdGenerator
+                    passwordPolicy:
+                      type: SimplePasswordPolicy
+                      id: adminPwdPolicy
+                      displayName: Default Password Policy for Admins
+                      properties:
+                        noPreviouslyUsedPasswords: 'true'
+                    passwordService:
+                      type: PersisterPasswordService
+                      id: adminPwdService
+                      displayName: Admin Password Service
+                      properties:
+                        hashFunction:
+                          ref: pwdHash
+                        userStore:
+                          ref: adminUserStore
+                userPersister:
+                  ref: adminPersister
+            userPersister:
+              ref: adminPersister
+        passwordPolicy:
+          ref: adminPwdPolicy
+        passwordService:
+          ref: adminPwdService
+    eventSettings:
+      type: AdminappEventSettings
+      id: adminappEventSettings
+      properties:
+        eventSubscribers:
+        - pluginList:
+          - type: AdminappEmailEventSubscriber
+            id: adminappEmailEventSubscriber
+            displayName: Email Event Subscriber for User Locked (Adminapp)
+            properties:
+              bodyResourceKey: email.notification.user-locked-event.body
+              emailService:
+                ref: dummyEmailService
+              event:
+                ref: userLockedEvent
+              languageContextDataName:
+                ref: ctxDataItemNameLang
+              recipientAddress:
+                type: ContextDataRecipient
+                id: eventEmailRecipientFromCtxData
+                properties:
+                  contextDataName:
+                    ref: ctxDataItemNameEmail
+              subjectResourceKey: email.notification.user-locked-event.subject
+    gatewaySettings:
+      type: AirlockMicrogateway
+      id: airlockMicrogatewayAdminapp
+      displayName: Airlock Microgateway Settings (Adminapp)
+      properties:
+        clientIpExtractor:
+          type: ClientIpExtractor
+          id: microgatewayClientIpExtractorAdminapp
+          properties:
+            httpHeaderName: X-Forwarded-For
+            ignorePrivateIpAddresses: 'false'
+        requestIdExtractor:
+          type: RequestIdExtractor
+          id: microgatewayRequestIdExtractorAdminapp
+          properties:
+            httpHeaderName: X-Request-ID
+        requestUrlExtractor:
+          type: RequestUrlExtractor
+          id: microgatewayRequestUrlExtractorAdminapp
+          properties:
+            httpHeaderName: X-URL
+    licenseAnalytics:
+      type: LicenseAnalytics
+      id: analytics
+    logViewer:
+      type: LogViewer
+      id: logViewer
+      properties:
+        colorScheme:
+        - pluginList:
+          - type: ColoringRule
+            id: auditLogColoringRule
+            displayName: Audit Log
+            properties:
+              backgroundColor: blue
+              regexpPatternString: ^MEDUSA Audit Log Message
+          - type: ColoringRule
+            id: successfulLoginsLogColoringRule
+            displayName: Successful Logins
+            properties:
+              backgroundColor: green
+              regexpPatternString: is\ssuccessfully\sauthenticated\sby
+          - type: ColoringRule
+            id: successfulAdminLoginLogColoringRule
+            displayName: Successful Admin Logins
+            properties:
+              backgroundColor: green
+              regexpPatternString: Administrator.*successfully\sauthenticated|Authenticated\sadministrator
+          - type: ColoringRule
+            id: failedLoginsLogColoringRule
+            displayName: Failed Logins
+            properties:
+              backgroundColor: yellow
+              regexpPatternString: Authentication failed
+          - type: ColoringRule
+            id: warningsLogColoringRule
+            displayName: Warnings
+            properties:
+              backgroundColor: orange
+              regexpPatternString: WARN
+          - type: ColoringRule
+            id: exceptionsLogColoringRule
+            displayName: Exceptions
+            properties:
+              backgroundColor: red
+              regexpPatternString: '\bException-(Type|ID)\s:'
+          - type: ColoringRule
+            id: configActionsLogColoringRule
+            displayName: Config Actions
+            properties:
+              backgroundColor: purple
+              regexpPatternString: (Configuration activation)|(Activated configuration)
+          - type: ColoringRule
+            id: bannerLogColoringRule
+            displayName: Banner
+            properties:
+              backgroundColor: black
+              foregroundColor: black
+              foregroundColorForMetaData: black
+              regexpPatternString: _\s+_\s+_\s+_\s+___\s+_\s+__\s+__
+        logfiles:
+        - pluginList:
+          - type: LogFile
+            id: loginappLogFile
+            displayName: Loginapp Logfile
+            properties:
+              file: ./instances/auth/logs/loginapp-parsable.log
+              filterPatterns:
+              - pluginList:
+                - type: FilterPattern
+                  id: warningLogViewerPattern
+                  displayName: Pattern for Warnings
+                  properties:
+                    nameTranslationKey: logViewer.warnings-only.label
+                    regexpPatternString: WARN
+                - type: FilterPattern
+                  id: auditLogViewerPattern
+                  displayName: Pattern for Audit Messages
+                  properties:
+                    nameTranslationKey: logViewer.audit-log.label
+                    regexpPatternString: MEDUSA Audit Log Message
+                - type: FilterPattern
+                  id: exceptionLogViewerPattern
+                  displayName: Pattern for Exceptions
+                  properties:
+                    nameTranslationKey: logViewer.exception-reasons.label
+                    regexpPatternString: '\bException-(Type|ID)\s:'
+                - type: FilterPattern
+                  id: failedLoginsLogViewerPattern
+                  displayName: Pattern for Failed Logins
+                  properties:
+                    nameTranslationKey: logViewer.login-failures.label
+                    regexpPatternString: for\sauthentication\smethod.*with\sresult\s'FAIL'|Username/Password\sAuthentication\sStep.*with\sresult\s'FAIL_RETRY'
+                - type: FilterPattern
+                  id: successfulLoginsLogViewerPattern
+                  displayName: Pattern for Successful Logins
+                  properties:
+                    nameTranslationKey: logViewer.successful-logins.label
+                    regexpPatternString: is\ssuccessfully\sauthenticated\sby
+              nameTranslationKey: logViewer.login-app.name
+          - type: LogFile
+            id: adminappLogFile
+            displayName: Adminapp Logfile
+            properties:
+              file: ./instances/auth/logs/adminapp-parsable.log
+              filterPatterns:
+              - pluginList:
+                - ref: auditLogViewerPattern
+                - ref: exceptionLogViewerPattern
+                - ref: warningLogViewerPattern
+                - type: FilterPattern
+                  id: failedAdminLoginsLogViewerPattern
+                  displayName: Pattern for Failed Admin Logins
+                  properties:
+                    nameTranslationKey: logViewer.login-failures.label
+                    regexpPatternString: 'Failed\sto\sauthenticate:'
+                - type: FilterPattern
+                  id: successfulAdminLoginsLogViewerPattern
+                  displayName: Pattern for Successful Admin Logins
+                  properties:
+                    nameTranslationKey: logViewer.successful-logins.label
+                    regexpPatternString: Administrator.*successfully\sauthenticated|Authenticated\sadministrator
+              nameTranslationKey: logViewer.admin-app.name
+          - type: LogFile
+            id: transactionApprovalLogFile
+            displayName: Transaction Approval Logfile
+            properties:
+              file: ./instances/auth/logs/transaction-approval-parsable.log
+              nameTranslationKey: logViewer.transaction-approval-app.name
+          - type: LogFile
+            id: serviceContainerLogFile
+            displayName: Servicecontainerapp Logfile
+            properties:
+              file: ./instances/auth/logs/servicecontainerapp-parsable.log
+              filterPatterns:
+              - pluginList:
+                - type: FilterPattern
+                  id: serverStatisticsLogViewerPattern
+                  displayName: Pattern for Server Statistics
+                  properties:
+                    nameTranslationKey: logViewer.statistics.label
+                    regexpPatternString: 'Stats:'
+                - ref: exceptionLogViewerPattern
+                - ref: auditLogViewerPattern
+                - ref: warningLogViewerPattern
+              nameTranslationKey: logViewer.servicecontainer-app.name
+    maintenanceMessages:
+      type: MaintenanceMessageConfiguration
+      id: adminappMaintMsgs
+      displayName: Manage Maintenance Messages
+      properties:
+        enableMenuItem: 'true'
+        languages:
+        - valueList:
+          - de
+          - en
+          - fr
+          - it
+        messagesPerPage: '25'
+        persister:
+          ref: maintMsgPersister
+    rest:
+      type: AdminappRest
+      id: adminRestApi
+      displayName: Adminapp REST API
+      properties:
+        requestAuthentication:
+          type: BasicAuthRequestAuthentication
+          id: adminRestApiBasicAuth
+          properties:
+            passwordRepository:
+              type: ExternalDatabasePasswordRepository
+              id: adminPwdRepo
+              displayName: Admin Password Repository
+              properties:
+                hashFunction:
+                  ref: pwdHash
+                userStore:
+                  ref: adminUserStore
+            userStore:
+              ref: adminUserStore
+        corsSettings:
+          type: CorsSettings
+          id: mcpAdminCors
+          properties:
+            allowedOrigins:
+            - valueList:
+              - ^https://iam-mcp-127-0-0-1\.nip\.io:8443$
+            strictCorsValidation: true
+    serviceContainerSharedSecret:
+    - var:
+        name: IAM_SERVICE_CONTAINER_SECRET
+        sensitive: true
+      value: '[FILE]/etc/iam-secrets/service-container-secret'
+    users:
+      type: UsersConfiguration
+      id: userMgmtConfig
+      properties:
+        advancedSearchFilters:
+        - pluginList:
+          - type: LockedUserFilter
+            id: lockStatusUserFilter
+            displayName: Filter by locking status
+          - type: SimpleLatestSuccessfulLoginFilter
+            id: latestSuccessfulLoginUserFilter
+            displayName: Filter by lastest successful login
+        authenticationTokens:
+        - pluginList:
+          - type: PasswordTokenController
+            id: userPwdManagement
+            displayName: Manage User Passwords
+            properties:
+              passwordGenerator:
+                type: PasswordGenerator
+                id: userMgmtPasswordGenerator
+                displayName: User Password Generation
+                properties:
+                  fileNamePrefix: password
+                  fileNameSuffix: .pdf
+                  generator:
+                    ref: userPwdGenerator
+                  outputDirectory: instances/auth/pdfs
+                  workingDirectory: instances/auth/pdfs/inwork
+        availableUserRoles:
+        - valueList:
+          - customer
+          - employee
+          - admin
+        columnsInUserList:
+        - pluginList:
+          - ref: givennameLabel
+          - ref: surnameLabel
+          - type: StringUserProfileItem
+            id: companyLabel
+            displayName: Company Admintool Label
+            properties:
+              propertyName: company
+              stringResourceKey: userdata.label.company
+          - type: StringUserProfileItem
+            id: authMethodLabel
+            displayName: Authmethod Admintool Label
+            properties:
+              propertyName: auth_method
+              stringResourceKey: listuserspage.col-label-auth-method
+        defaultSortColumn: username
+        export:
+          type: CsvUsersExport
+          id: csvUserExport
+          displayName: CSV Users Export
+          properties:
+            contextKeys:
+            - valueList:
+              - salutation
+              - givenname
+              - surname
+              - street
+              - streetNumber
+              - address2
+              - zipcode
+              - town
+              - state
+              - country
+              - company
+              - email
+              - language
+              - disclaimer_tag
+              - auth_method
+            type: FULL
+        languageContextKey: language
+        lockingSettings:
+          type: LockingSettings
+          id: userMgmtLockingSettings
+          properties:
+            lockReasons:
+            - valueList:
+              - LockReason.InitiatedByUser
+              - LockReason.InitiatedByAdmin
+            temporaryLockingConfig:
+              ref: tempLocking
+        maxUsersToList: '25'
+        rememberMeManagementEnabled: 'true'
+        rememberMeSettings:
+          ref: rememberMeSettings
+        rowsOnUserDetailPage:
+        - pluginList:
+          - type: StringUserProfileItem
+            id: salutationLabel
+            displayName: Salutation Admintool Label
+            properties:
+              propertyName: salutation
+              stringResourceKey: userdata.label.salutation
+          - ref: givennameLabel
+          - ref: surnameLabel
+          - type: StringUserProfileItem
+            id: streetLabel
+            displayName: Street Admintool Label
+            properties:
+              propertyName: street
+              stringResourceKey: userdata.label.street
+          - type: StringUserProfileItem
+            id: streetNumberLabel
+            displayName: Streetnumber Admintool Label
+            properties:
+              propertyName: streetNumber
+              stringResourceKey: userdata.label.street-number
+          - type: StringUserProfileItem
+            id: zipLabel
+            displayName: Zipcode Admintool Label
+            properties:
+              propertyName: zipcode
+              stringResourceKey: userdata.label.zipcode
+          - type: StringUserProfileItem
+            id: townLabel
+            displayName: Town Admintool Label
+            properties:
+              propertyName: town
+              stringResourceKey: userdata.label.town
+          - type: ListUserProfileItem
+            id: countryLabel
+            displayName: Country Admintool Label
+            properties:
+              itemList: "534\n      ABW\n      AFG\n      AGO\n      AIA\n      ALB\n      AND\n      ARE\n    \
+                \  ARG\n      ARM\n      ASM\n      ATF\n      ATG\n      AUS\n      AUT\n      AZE\n      BDI\n\
+                \      BEL\n      BEN\n      BES\n      BFA\n      BGD\n      BGR\n      BHR\n      BHS\n      BIH\n\
+                \      BLR\n      BLZ\n      BMU\n      BOL\n      BRA\n      BRB\n      BRN\n      BTN\n      BVT\n\
+                \      BWA\n      CAF\n      CAN\n      CHE\n      CHL\n      CHN\n      CIV\n      CMR\n      COD\n\
+                \      COG\n      COK\n      COL\n      COM\n      CPV\n      CRI\n      CUB\n      CUW\n      CXR\n\
+                \      CYM\n      CYP\n      CZE\n      DEU\n      DJI\n      DMA\n      DNK\n      DOM\n      DZA\n\
+                \      ECU\n      EGY\n      ERI\n      ESH\n      ESP\n      EST\n      ETH\n      FIN\n      FJI\n\
+                \      FLK\n      FRA\n      FSM\n      GAB\n      GBR\n      GEO\n      GGY\n      GHA\n      GIB\n\
+                \      GIN\n      GLP\n      GMB\n      GNB\n      GNQ\n      GRC\n      GRD\n      GRL\n      GTM\n\
+                \      GUF\n      GUM\n      GUY\n      HKG\n      HMD\n      HND\n      HRV\n      HTI\n      HUN\n\
+                \      IDN\n      IND\n      IOT\n      IRL\n      IRN\n      IRQ\n      ISL\n      ISR\n      ITA\n\
+                \      JAM\n      JEY\n      JOR\n      JPN\n      KAZ\n      KEN\n      KGZ\n      KHM\n      KIR\n\
+                \      KNA\n      KOR\n      KWT\n      LAO\n      LBN\n      LBR\n      LBY\n      LCA\n      LIE\n\
+                \      LKA\n      LSO\n      LTU\n      LUX\n      LVA\n      MAC\n      MAR\n      MCO\n      MDA\n\
+                \      MDG\n      MDV\n      MEX\n      MHL\n      MKD\n      MLI\n      MLT\n      MMR\n      MNE\n\
+                \      MNG\n      MNP\n      MOZ\n      MRT\n      MSR\n      MTQ\n      MUS\n      MWI\n      MYS\n\
+                \      MYT\n      NAM\n      NCL\n      NER\n      NFK\n      NGA\n      NIC\n      NIU\n      NLD\n\
+                \      NOR\n      NPL\n      NRU\n      NZL\n      OMN\n      PAK\n      PAN\n      PCN\n      PER\n\
+                \      PHL\n      PLW\n      PNG\n      POL\n      PRI\n      PRK\n      PRT\n      PRY\n      PSE\n\
+                \      PYF\n      QAT\n      REU\n      ROU\n      RUS\n      RWA\n      SAU\n      SDN\n      SEN\n\
+                \      SGP\n      SGS\n      SHN\n      SLB\n      SLE\n      SLV\n      SMR\n      SOM\n      SPM\n\
+                \      SRB\n      SSD\n      STP\n      SUR\n      SVK\n      SVN\n      SWE\n      SWZ\n      SXM\n\
+                \      SYC\n      SYR\n      TCA\n      TCD\n      TGO\n      THA\n      TJK\n      TKL\n      TKM\n\
+                \      TLS\n      TON\n      TTO\n      TUN\n      TUR\n      TUV\n      TWN\n      TZA\n      UGA\n\
+                \      UKR\n      UMI\n      URY\n      USA\n      UZB\n      VAT\n      VCT\n      VEN\n      VGB\n\
+                \      VIR\n      VNM\n      VUT\n      WLF\n      WSM\n      YEM\n      ZAF\n      ZMB\n      ZWE"
+              itemsAreResourceKeys: 'true'
+              propertyName: country
+              resourceKeyPrefix: countries
+              sortItems: 'true'
+              stringResourceKey: userdata.label.country
+          - ref: companyLabel
+          - type: EmailUserProfileItem
+            id: userEmailLabel
+            displayName: 'User Email Admintool Label '
+            properties:
+              checkUniqueness:
+                ref: userPersister
+              propertyName: email
+              stringResourceKey: userdata.label.email
+          - type: ListUserProfileItem
+            id: langLabel
+            displayName: Language Admintool Label
+            properties:
+              itemList: "de\n      fr\n      en"
+              itemsAreResourceKeys: 'true'
+              propertyName: language
+              resourceKeyPrefix: language
+              sortItems: 'true'
+              stringResourceKey: userdata.label.correspondence-language
+        showUserValidSection: 'true'
+        userDataSource:
+          type: UserStoreConfiguration
+          id: userMgmtUserStore
+        userSearchProfileItems:
+        - pluginList:
+          - type: UserProfileItemSearch
+            id: givennameUserSearchItem
+            displayName: Givenname Admintool User Search Item
+            properties:
+              propertyName: givenname
+          - type: UserProfileItemSearch
+            id: surnameUserSearchItem
+            displayName: Surname Admintool User Search Item
+            properties:
+              propertyName: surname
+          - type: UserProfileItemSearch
+            id: companyUserSearchItem
+            displayName: Company Admintool User Search Item
+            properties:
+              propertyName: company
+          - type: UserProfileItemSearch
+            id: authMethodUserSearchItem
+            displayName: Authmethod Admintool User Search Item
+            properties:
+              propertyName: auth_method
+- type: ServiceContainer
+  id: serviceContainerApp
+  displayName: servicecontainerapp
+  properties:
+    serviceContainerSharedSecret:
+    - var:
+        name: IAM_SERVICE_CONTAINER_SECRET
+        sensitive: true
+      value: '[FILE]/etc/iam-secrets/service-container-secret'
+    services:
+    - pluginList:
+      - type: Service
+        id: serviceConfigForTaskScheduler
+        displayName: Task Scheduler Config
+        properties:
+          service:
+            type: TaskSchedulerService
+            id: taskScheduler
+            displayName: Task Scheduler Settings
+            properties:
+              tasks:
+              - pluginList:
+                - type: TaskSchedule
+                  id: pwdLetterTaskSchedule
+                  displayName: Schedule for Password Letters
+                  properties:
+                    interval: never
+                    name: Generate Password Letters
+                    task:
+                      type: PasswordBatchTask
+                      id: pwdLetterTask
+                      displayName: Password Letter Task
+                      properties:
+                        credentialSecretGenerator:
+                          type: CredentialSecretGenerator
+                          id: pwdLetterTaskPwdGenerator
+                          displayName: Password Letter Credential Secret Generator
+                          properties:
+                            configuredFileNameSuffix: pdf
+                            deleteOldPasswords: 'true'
+                            hashFunctionPlugin:
+                              ref: pwdHash
+                            languageAttributeName: language
+                            outputDirectoryPath: instances/auth/pdfs
+                            passwordGenerator:
+                              ref: userPwdGenerator
+                            passwordRenderer:
+                              type: WordTemplatePasswordRenderer
+                              id: pwdLetterWordRenderer
+                              displayName: Password Letter Word Template
+                              properties:
+                                defaultTemplate: instances/common/report-templates/password-letter-de.docx
+                                saveOptions:
+                                  type: PdfSaveAction
+                                  id: pwdLetterSaveOptions
+                                  displayName: PDF Save Options with System Default Fonts
+                                template:
+                                - pluginList:
+                                  - type: LanguageSpecificTemplate
+                                    id: pwdLetterTemplateEn
+                                    displayName: Password English Template
+                                    properties:
+                                      language: en
+                                      template: instances/common/report-templates/password-letter-en.docx
+                            reportTypeShortDesc: password letter
+                            workingDirectoryPath: instances/auth/pdfs/inwork
+                        tokenCleanupConfigs:
+                        - pluginList:
+                          - type: RememberMeTokenCleanup
+                            id: rememberMeCleanup
+                            properties:
+                              rememberMeConfig:
+                                ref: rememberMeRepo
+                        userIterator:
+                          type: DatabaseUserPersister
+                          id: usersWithPwdFlagSetPersister
+                          displayName: Users with password flag set
+                          parentRef: userPersister
+                          properties:
+                            additionalIteratorWhereClause: pwd_order_new = 1
+                        userPersister:
+                          ref: usersWithPwdFlagSetPersister
+                - type: TaskSchedule
+                  id: rememberMeCleanupTaskSchedule
+                  displayName: Schedule for Remember-Me Cleanup Task
+                  properties:
+                    firstTime: 04:00:00
+                    interval: 1 day
+                    name: Cleanup expired Remember-Me tokens
+                    task:
+                      type: RememberMeTokenCleanupTask
+                      id: rememberMeCleanupTask
+                      properties:
+                        rememberMeConfig:
+                          ref: rememberMeSettings
+                - type: TaskSchedule
+                  id: userTrailLogCleanupTaskSchedule
+                  displayName: Schedule for User Trail Log Clean-up Task
+                  properties:
+                    firstTime: 03:00:00
+                    interval: 1 day
+                    name: Clean-up expired User Trail Logs
+                    task:
+                      type: UserTrailLogCleanupTask
+                      id: userTrailLogCleanupTask
+                      properties:
+                        logRetentionTime: 30d
+                - type: TaskSchedule
+                  id: ssoTicketCleanupTaskSchedule
+                  displayName: Schedule for Accepted SSO Tickets Clean-up Task
+                  properties:
+                    firstTime: 05:00:00
+                    interval: 1 day
+                    name: Clean-up expired accepted SSO tickets
+                    task:
+                      type: AcceptedSsoTicketsCleanupTask
+                      id: ssoTicketCleanupTask

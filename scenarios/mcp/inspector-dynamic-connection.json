@@ -1,0 +1,16 @@
+{
+  "note": "Manual MCP Inspector connection settings; not an Inspector import format.",
+  "transport": "Streamable HTTP",
+  "url": "https://mcp-iam-127-0-0-1.nip.io:8443/mcp",
+  "client_id": "mcp-dynamic-demo",
+  "token_endpoint_auth_method": "none",
+  "response_type": "code",
+  "code_challenge_method": "S256",
+  "scope": "openid profile email",
+  "registered_redirect_uris": [
+    "http://localhost:6274/oauth/callback",
+    "http://127.0.0.1:6274/oauth/callback"
+  ],
+  "issuer": "https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp-dynamic",
+  "protected_resource_metadata": "https://mcp-iam-127-0-0-1.nip.io:8443/.well-known/oauth-protected-resource/mcp"
+}

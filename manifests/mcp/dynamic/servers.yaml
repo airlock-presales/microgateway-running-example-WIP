@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: mcp-echo}
+  template:
+    metadata:
+      labels: {app: mcp-echo}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: server
+          image: python:3.13.12-alpine3.23
+          command: [python, -u, -B, /app/server.py]
+          env:
+            - name: MCP_SERVER
+              value: echo
+          ports:
+            - {name: http, containerPort: 8000}
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 200m, memory: 64Mi}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: code, mountPath: /app, readOnly: true}
+      volumes:
+        - name: code
+          configMap: {name: mcp-demo-server}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-echo
+spec:
+  selector: {app: mcp-echo}
+  ports:
+    - {name: http, port: 8000, targetPort: http}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-math
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: mcp-math}
+  template:
+    metadata:
+      labels: {app: mcp-math}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: server
+          image: python:3.13.12-alpine3.23
+          command: [python, -u, -B, /app/server.py]
+          env:
+            - name: MCP_SERVER
+              value: math
+          ports:
+            - {name: http, containerPort: 8000}
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 200m, memory: 64Mi}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            initialDelaySeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: code, mountPath: /app, readOnly: true}
+      volumes:
+        - name: code
+          configMap: {name: mcp-demo-server}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-math
+spec:
+  selector: {app: mcp-math}
+  ports:
+    - {name: http, port: 8000, targetPort: http}

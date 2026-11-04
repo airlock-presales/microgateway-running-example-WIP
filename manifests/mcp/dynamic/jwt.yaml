@@ -1,0 +1,15 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: JWT
+metadata:
+  name: airlock-iam-dynamic
+spec:
+  requireAny:
+  - jwksRef:
+      name: airlock-iam-dynamic
+    issuer: https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp-dynamic
+    audiences:
+    - https://mcp-iam-127-0-0-1.nip.io:8443/mcp
+  expirationRequired: true
+  extractionSources:
+  - bearerToken: {}
+  clockSkewTolerance: 10s

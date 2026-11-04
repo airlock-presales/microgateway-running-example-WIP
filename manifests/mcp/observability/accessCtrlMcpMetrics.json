@@ -1,0 +1,2807 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "microgateway-access-control-mcp-metrics",
+    "generation": 2,
+    "creationTimestamp": "2026-09-14T14:30:44Z",
+    "labels": {},
+    "annotations": {}
+  },
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "builtIn": true,
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "query": {
+            "group": "grafana",
+            "kind": "DataQuery",
+            "spec": {},
+            "version": "v0"
+          }
+        }
+      }
+    ],
+    "cursorSync": "Off",
+    "description": "Access control metrics dashboard for MCP traffic.",
+    "editable": true,
+    "elements": {
+      "panel-100": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (mcp_method) (count_over_time({container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` [$__auto]))",
+                        "legendFormat": "{{mcp_method}}",
+                        "queryType": "range"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Requests by method"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Number of MCP requests per MCP method (JSON-RPC method) over time.",
+          "id": 100,
+          "links": [],
+          "title": "MCP Requests by Method",
+          "vizConfig": {
+            "group": "timeseries",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 25,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "normal"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-101": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "topk(10, sum by (mcp_tool) (count_over_time({container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` | mcp_method = `tools/call` [$__range])))",
+                        "legendFormat": "{{mcp_tool}}",
+                        "queryType": "instant"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Top 10 tools"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "renameByRegex",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "regex": "^Value.*$",
+                      "renamePattern": "# Requests"
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "# Requests": 1,
+                        "mcp_tool": 0
+                      },
+                      "renameByName": {}
+                    }
+                  }
+                },
+                {
+                  "group": "sortBy",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "sort": [
+                        {
+                          "desc": true,
+                          "field": "# Requests"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "The top 10 MCP tools by number of tools/call requests.",
+          "id": 101,
+          "links": [],
+          "title": "Top 10 MCP Tools",
+          "vizConfig": {
+            "group": "barchart",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "barRadius": 0,
+                "barWidth": 0.7,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": false
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "mcp_tool",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-102": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "topk(10, sum by (user_id) (count_over_time({container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` | user_id != \"\" [$__range])))",
+                        "legendFormat": "{{user_id}}",
+                        "queryType": "instant"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Top 10 users"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "renameByRegex",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "regex": "^Value.*$",
+                      "renamePattern": "# Requests"
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "# Requests": 1,
+                        "user_id": 0
+                      },
+                      "renameByName": {}
+                    }
+                  }
+                },
+                {
+                  "group": "sortBy",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "sort": [
+                        {
+                          "desc": true,
+                          "field": "# Requests"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "The top 10 users (JWT subject;issuer) by number of MCP requests.",
+          "id": 102,
+          "links": [],
+          "title": "Top 10 Users",
+          "vizConfig": {
+            "group": "barchart",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "barRadius": 0,
+                "barWidth": 0.7,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": false
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "user_id",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-103": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "topk(10, sum by (endpoint) (count_over_time({container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` | label_format endpoint=`{{ .domain }}{{ .url }}` [$__range])))",
+                        "legendFormat": "{{endpoint}}",
+                        "queryType": "instant"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Requests by endpoint"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "renameByRegex",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "regex": "^Value.*$",
+                      "renamePattern": "# Requests"
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "# Requests": 1,
+                        "endpoint": 0
+                      },
+                      "renameByName": {}
+                    }
+                  }
+                },
+                {
+                  "group": "sortBy",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "sort": [
+                        {
+                          "desc": true,
+                          "field": "# Requests"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Number of MCP requests per endpoint (URL domain and path as logged). If the route rewrites the host, allowed requests show the upstream host.",
+          "id": 103,
+          "links": [],
+          "title": "MCP Requests by Endpoint",
+          "vizConfig": {
+            "group": "barchart",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "barRadius": 0,
+                "barWidth": 0.7,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": false
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "endpoint",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-104": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (user_id, mcp_tool) (count_over_time({container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` | mcp_method = `tools/call` | user_id != \"\" [$__range]))",
+                        "legendFormat": "__auto",
+                        "queryType": "instant"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Tool calls by user"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "renameByRegex",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "regex": "^Value.*$",
+                      "renamePattern": "# Requests"
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "# Requests": 2,
+                        "mcp_tool": 1,
+                        "user_id": 0
+                      },
+                      "renameByName": {
+                        "mcp_tool": "MCP Tool",
+                        "user_id": "User ID"
+                      }
+                    }
+                  }
+                },
+                {
+                  "group": "sortBy",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "sort": [
+                        {
+                          "desc": true,
+                          "field": "# Requests"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Number of tools/call requests per user and MCP tool.",
+          "id": 104,
+          "links": [],
+          "title": "MCP Tool Calls by User",
+          "vizConfig": {
+            "group": "table",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "text",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": true,
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "# Requests"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 120
+                      },
+                      {
+                        "id": "custom.align",
+                        "value": "right"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "options": {
+                "cellHeight": "sm",
+                "enablePagination": true,
+                "showHeader": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-105": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (mcp_method, mcp_tool, client_ip) (count_over_time({container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` | authorized = `false` [$__range]))",
+                        "legendFormat": "__auto",
+                        "queryType": "instant"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Non authorized"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "renameByRegex",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "regex": "^Value.*$",
+                      "renamePattern": "# Requests"
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "# Requests": 3,
+                        "client_ip": 2,
+                        "mcp_method": 0,
+                        "mcp_tool": 1
+                      },
+                      "renameByName": {
+                        "client_ip": "Client IP",
+                        "mcp_method": "MCP Method",
+                        "mcp_tool": "MCP Tool"
+                      }
+                    }
+                  }
+                },
+                {
+                  "group": "sortBy",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "sort": [
+                        {
+                          "desc": true,
+                          "field": "# Requests"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "MCP requests that were not authorized, per MCP method, MCP tool and client IP. Requests without a valid JWT carry no user ID.",
+          "id": 105,
+          "links": [],
+          "title": "Non Authorized MCP Requests",
+          "vizConfig": {
+            "group": "table",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "text",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": true,
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": true
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "# Requests"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 120
+                      },
+                      {
+                        "id": "custom.align",
+                        "value": "right"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "options": {
+                "cellHeight": "sm",
+                "enablePagination": true,
+                "showHeader": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-106": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_LOKI}"
+                      },
+                      "group": "loki",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "quantile_over_time(0.95, {container=\"airlock-microgateway-engine\", pod=~\"${gateway_pod:regex}\"} |= \"envoy.access\" | json log_type=\"event.dataset\", mcp_method=\"mcp.method\", mcp_tool=\"mcp.tool_name\", user_id=\"airlock.access_control.user_id\", authorized=\"airlock.access_control.authorized\", domain=\"url.domain\", url=\"url.path\", client_ip=\"network.forwarded_ip\", route_kind=\"airlock.route.kind\", route_ns=\"airlock.route.namespace\", route_name=\"airlock.route.name\" | log_type = `envoy.access` | mcp_method != \"\" | label_format route=`{{ .route_kind | lower }}/{{ .route_ns }}/{{ .route_name }}` | route =~ `${route:regex}` | mcp_method = `tools/call` | json duration=\"event.duration\" | unwrap duration [$__auto]) by (mcp_tool)",
+                        "legendFormat": "{{mcp_tool}}",
+                        "queryType": "range"
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "p95 duration"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "95th percentile of the request duration of tools/call requests per MCP tool.",
+          "id": 106,
+          "links": [],
+          "title": "MCP Tool Call Duration (p95)",
+          "vizConfig": {
+            "group": "timeseries",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 25,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "ns"
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-110": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "round(sum (increase(envoy_http_mcp_invalid_json{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+                        "legendFormat": "Invalid JSON",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Invalid JSON"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Requests whose body could not be parsed as JSON. Envoy MCP filter counter envoy_http_mcp_invalid_json.",
+          "id": 110,
+          "links": [],
+          "title": "Invalid JSON",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-111": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "round(sum (increase(envoy_http_mcp_body_too_large{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+                        "legendFormat": "Body Too Large",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Body Too Large"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Requests whose body exceeded the MCP filter body size limit. Envoy MCP filter counter envoy_http_mcp_body_too_large.",
+          "id": 111,
+          "links": [],
+          "title": "Body Too Large",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-112": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "round(sum (increase(envoy_http_mcp_duplicate_keys_rejected{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+                        "legendFormat": "Duplicate Keys Rejected",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Duplicate Keys Rejected"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Requests rejected because the JSON body contained duplicate keys. Envoy MCP filter counter envoy_http_mcp_duplicate_keys_rejected.",
+          "id": 112,
+          "links": [],
+          "title": "Duplicate Keys Rejected",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-113": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "round(sum (increase(envoy_http_mcp_requests_rejected{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+                        "legendFormat": "Requests Rejected",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Requests Rejected"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Requests rejected by the MCP filter because they did not follow the MCP specification. Envoy MCP filter counter envoy_http_mcp_requests_rejected.",
+          "id": 113,
+          "links": [],
+          "title": "Requests Rejected",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-114": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum (rate(envoy_http_mcp_invalid_json{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__rate_interval]))",
+                        "legendFormat": "Invalid JSON",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Invalid JSON"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum (rate(envoy_http_mcp_body_too_large{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__rate_interval]))",
+                        "legendFormat": "Body Too Large",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Body Too Large"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum (rate(envoy_http_mcp_duplicate_keys_rejected{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__rate_interval]))",
+                        "legendFormat": "Duplicate Keys Rejected",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Duplicate Keys Rejected"
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum (rate(envoy_http_mcp_requests_rejected{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\"}[$__rate_interval]))",
+                        "legendFormat": "Requests Rejected",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Requests Rejected"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Rate of requests counted by the Envoy MCP filter error counters.",
+          "id": 114,
+          "links": [],
+          "title": "MCP Filter Errors",
+          "vizConfig": {
+            "group": "timeseries",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 25,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "normal"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "reqps"
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-21": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (authorized) (rate(microgateway_authenticated_requests_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`}[1m]))",
+                        "legendFormat": "Authorized: {{authorized}}",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Requests per second"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Rate of requests (per second) that were successfully authenticated and matched an Access Control policy.",
+          "id": 21,
+          "links": [],
+          "title": "Authenticated Requests",
+          "vizConfig": {
+            "group": "timeseries",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 25,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "normal"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Authorized: false"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "orange",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-70": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "round(sum (increase(microgateway_authenticated_requests_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`, authorized=\"false\"}[$__range])))/\nround(sum (increase(microgateway_authenticated_requests_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`}[$__range])))",
+                        "legendFormat": "Non Authorized Request Rate",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Non Authorized Request Rate"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Rate of authenticated requests that could not be authorized by the matching Access Control policy.",
+          "id": 70,
+          "links": [],
+          "title": "Non Authorized Request Rate",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [
+                    {
+                      "options": {
+                        "0": {
+                          "color": "text",
+                          "index": 1,
+                          "text": "0%"
+                        }
+                      },
+                      "type": "value"
+                    },
+                    {
+                      "options": {
+                        "match": "null+nan",
+                        "result": {
+                          "color": "text",
+                          "index": 0,
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "orange",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "percentunit"
+                },
+                "overrides": []
+              },
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-74": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "round(sum (increase(microgateway_authenticated_requests_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`}[$__range])))",
+                        "legendFormat": "Total Requests",
+                        "range": true
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Total Requests"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "Total number of MCP requests that were successfully authenticated with a JWT and matched an Access Control policy.",
+          "id": 74,
+          "links": [],
+          "title": "Total Authenticated Requests",
+          "vizConfig": {
+            "group": "stat",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-78": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "exemplar": false,
+                        "expr": "round(sum by (policy) (increase(microgateway_authenticated_requests_total{result!=\"success\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`}[$__range])))",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "Top 5 Policies"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "reduce",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "reducers": [
+                        "lastNotNull"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "group": "organize",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {},
+                      "includeByName": {},
+                      "indexByName": {},
+                      "renameByName": {
+                        "Last *": "# Requests"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "The top 5 Access Control policies by number of matching authenticated requests.",
+          "id": 78,
+          "links": [],
+          "title": "Top 5 Access Control Policies",
+          "vizConfig": {
+            "group": "barchart",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 80,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 1,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "barRadius": 0,
+                "barWidth": 0.7,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": false
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "Field",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-80": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "exemplar": false,
+                        "expr": "sum by (country_iso_code) (round(increase(microgateway_authenticated_requests_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`}[$__range])))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": []
+            }
+          },
+          "description": "",
+          "id": 80,
+          "links": [],
+          "title": "Authenticated Requests by Origin Country",
+          "vizConfig": {
+            "group": "geomap",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "basemap": {
+                  "config": {
+                    "maxZoom": 5,
+                    "server": "streets",
+                    "showLabels": true,
+                    "theme": "auto"
+                  },
+                  "name": "Layer 0",
+                  "noRepeat": true,
+                  "opacity": 1,
+                  "type": "osm-standard"
+                },
+                "controls": {
+                  "mouseWheelZoom": true,
+                  "showAttribution": true,
+                  "showDebug": false,
+                  "showMeasure": false,
+                  "showScale": false,
+                  "showZoom": true
+                },
+                "layers": [
+                  {
+                    "config": {
+                      "showLegend": false,
+                      "style": {
+                        "color": {
+                          "fixed": "blue"
+                        },
+                        "opacity": 0.7,
+                        "rotation": {
+                          "fixed": 0,
+                          "max": 360,
+                          "min": -360,
+                          "mode": "mod"
+                        },
+                        "size": {
+                          "field": "Value",
+                          "fixed": 5,
+                          "max": 60,
+                          "min": 10
+                        },
+                        "symbol": {
+                          "fixed": "img/icons/marker/circle.svg",
+                          "mode": "fixed"
+                        },
+                        "symbolAlign": {
+                          "horizontal": "center",
+                          "vertical": "center"
+                        },
+                        "text": {
+                          "field": "country_iso_code",
+                          "fixed": "",
+                          "mode": "field"
+                        },
+                        "textConfig": {
+                          "fontSize": 12,
+                          "offsetX": 0,
+                          "offsetY": 0,
+                          "textAlign": "center",
+                          "textBaseline": "middle"
+                        }
+                      }
+                    },
+                    "filterData": {
+                      "id": "byRefId",
+                      "options": "A"
+                    },
+                    "layer-tooltip": true,
+                    "location": {
+                      "lookup": "country_iso_code",
+                      "mode": "lookup"
+                    },
+                    "name": "Requests",
+                    "tooltip": true,
+                    "type": "markers"
+                  }
+                ],
+                "tooltip": {
+                  "mode": "details"
+                },
+                "view": {
+                  "allLayers": true,
+                  "dashboardVariable": false,
+                  "id": "zero",
+                  "lastOnly": false,
+                  "lat": 0,
+                  "layer": "Requests",
+                  "lon": 0,
+                  "noRepeat": true,
+                  "shared": false,
+                  "zoom": 1
+                }
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      },
+      "panel-81": {
+        "kind": "Panel",
+        "spec": {
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "hidden": false,
+                    "query": {
+                      "datasource": {
+                        "name": "${DS_PROMETHEUS}"
+                      },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
+                      "spec": {
+                        "editorMode": "code",
+                        "exemplar": false,
+                        "expr": "topk(10, sum by (country_iso_code) (round(increase(microgateway_authenticated_requests_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`^service/.+`,envoy_route=~`${route:regex}`}[$__range]))))",
+                        "format": "time_series",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      },
+                      "version": "v0"
+                    },
+                    "refId": "A"
+                  }
+                }
+              ],
+              "queryOptions": {},
+              "transformations": [
+                {
+                  "group": "reduce",
+                  "kind": "Transformation",
+                  "spec": {
+                    "options": {
+                      "labelsToFields": true,
+                      "reducers": [
+                        "sum"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "",
+          "id": 81,
+          "links": [],
+          "title": "Top 10 Authenticated Requests by Origin Country",
+          "vizConfig": {
+            "group": "barchart",
+            "kind": "VizConfig",
+            "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "fillOpacity": 100,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineWidth": 0,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
+              "options": {
+                "barRadius": 0.05,
+                "barWidth": 0.95,
+                "colorByField": "Total",
+                "fullHighlight": false,
+                "groupWidth": 0.8,
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": false
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                  "hideZeros": false,
+                  "maxHeight": 600,
+                  "mode": "single",
+                  "sort": "none"
+                },
+                "xField": "country_iso_code",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 100
+              }
+            },
+            "version": "13.2.3"
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "RowsLayout",
+      "spec": {
+        "rows": [
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-74"
+                        },
+                        "height": 5,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-70"
+                        },
+                        "height": 5,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-21"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 0,
+                        "y": 5
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-78"
+                        },
+                        "height": 12,
+                        "width": 12,
+                        "x": 12,
+                        "y": 5
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "Authenticated Requests"
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-100"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-101"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-102"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-103"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 11
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-104"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 0,
+                        "y": 22
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-105"
+                        },
+                        "height": 11,
+                        "width": 12,
+                        "x": 12,
+                        "y": 22
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-106"
+                        },
+                        "height": 11,
+                        "width": 24,
+                        "x": 0,
+                        "y": 33
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "MCP Usage"
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-110"
+                        },
+                        "height": 5,
+                        "width": 6,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-111"
+                        },
+                        "height": 5,
+                        "width": 6,
+                        "x": 6,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-112"
+                        },
+                        "height": 5,
+                        "width": 6,
+                        "x": 12,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-113"
+                        },
+                        "height": 5,
+                        "width": 6,
+                        "x": 18,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-114"
+                        },
+                        "height": 11,
+                        "width": 24,
+                        "x": 0,
+                        "y": 5
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "MCP Protocol Errors"
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-80"
+                        },
+                        "height": 17,
+                        "width": 9,
+                        "x": 0,
+                        "y": 0
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-81"
+                        },
+                        "height": 17,
+                        "width": 15,
+                        "x": 9,
+                        "y": 0
+                      }
+                    }
+                  ]
+                }
+              },
+              "title": "Authenticated Request by Origin Country"
+            }
+          }
+        ]
+      }
+    },
+    "links": [
+      {
+        "asDropdown": true,
+        "icon": "external link",
+        "includeVars": true,
+        "keepTime": true,
+        "tags": [
+          "airlock-microgateway"
+        ],
+        "targetBlank": true,
+        "title": "Airlock Microgateway",
+        "tooltip": "",
+        "type": "dashboards",
+        "url": ""
+      }
+    ],
+    "liveNow": false,
+    "preload": false,
+    "tags": [
+      "airlock-microgateway"
+    ],
+    "timeSettings": {
+      "autoRefresh": "",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "fiscalYearStartMonth": 0,
+      "from": "now-24h",
+      "hideTimepicker": false,
+      "timezone": "browser",
+      "to": "now"
+    },
+    "title": "Airlock Microgateway Access Control MCP - Metrics",
+    "variables": [
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "allowCustomValue": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "hide": "hideVariable",
+          "includeAll": false,
+          "label": "DS_LOKI",
+          "multi": false,
+          "name": "DS_LOKI",
+          "options": [],
+          "pluginId": "loki",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "skipUrlSync": false
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "allowCustomValue": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "hide": "hideVariable",
+          "includeAll": false,
+          "label": "DS_PROMETHEUS",
+          "multi": false,
+          "name": "DS_PROMETHEUS",
+          "options": [],
+          "pluginId": "prometheus",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "skipUrlSync": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "allValue": ".+",
+          "allowCustomValue": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "definition": "label_values(microgateway_build_info,managed_by)",
+          "description": "Allows filtering on the managing operator instance.",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Microgateway Operator",
+          "multi": true,
+          "name": "operator",
+          "options": [],
+          "query": {
+            "datasource": {
+              "name": "${DS_PROMETHEUS}"
+            },
+            "group": "prometheus",
+            "kind": "DataQuery",
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(microgateway_build_info,managed_by)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "version": "v0"
+          },
+          "refresh": "onTimeRangeChanged",
+          "regex": ".*",
+          "regexApplyTo": "value",
+          "skipUrlSync": false,
+          "sort": "disabled"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "allValue": ".+",
+          "allowCustomValue": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "definition": "label_values(microgateway_build_info{managed_by=~\"$operator\"},namespace)",
+          "description": "Allows filtering on the namespaces in which gateways are deployed.",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Gateway Namespace",
+          "multi": true,
+          "name": "namespace",
+          "options": [],
+          "query": {
+            "datasource": {
+              "name": "${DS_PROMETHEUS}"
+            },
+            "group": "prometheus",
+            "kind": "DataQuery",
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(microgateway_build_info{managed_by=~\"$operator\"},namespace)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "version": "v0"
+          },
+          "refresh": "onTimeRangeChanged",
+          "regex": "",
+          "regexApplyTo": "value",
+          "skipUrlSync": false,
+          "sort": "disabled"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "allowCustomValue": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "definition": "label_values(microgateway_build_info{managed_by=~\"$operator\", namespace=~\"$namespace\"},gateway)",
+          "description": "Allows filtering on specific gateway instance names within the selected namespaces.",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Gateway Name",
+          "multi": true,
+          "name": "gateway_name",
+          "options": [],
+          "query": {
+            "datasource": {
+              "name": "${DS_PROMETHEUS}"
+            },
+            "group": "prometheus",
+            "kind": "DataQuery",
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(microgateway_build_info{managed_by=~\"$operator\", namespace=~\"$namespace\"},gateway)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "version": "v0"
+          },
+          "refresh": "onTimeRangeChanged",
+          "regex": "",
+          "regexApplyTo": "value",
+          "skipUrlSync": false,
+          "sort": "alphabeticalAsc"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "allowCustomValue": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "definition": "label_values(envoy_vhost_route_upstream_rq{managed_by=~\"$operator\", namespace=~\"$namespace\", gateway=~\"$gateway_name\"},envoy_route)",
+          "description": "Allows filtering request metrics of the selected Gateway instances on the name of their matching route.",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Route",
+          "multi": true,
+          "name": "route",
+          "options": [],
+          "query": {
+            "datasource": {
+              "name": "${DS_PROMETHEUS}"
+            },
+            "group": "prometheus",
+            "kind": "DataQuery",
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(envoy_vhost_route_upstream_rq{managed_by=~\"$operator\", namespace=~\"$namespace\", gateway=~\"$gateway_name\"},envoy_route)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "version": "v0"
+          },
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "regexApplyTo": "value",
+          "skipUrlSync": false,
+          "sort": "disabled"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "allowCustomValue": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "definition": "label_values(microgateway_build_info{managed_by=~\"$operator\", namespace=~\"$namespace\", gateway=~\"$gateway_name\"},pod)",
+          "hide": "hideVariable",
+          "includeAll": true,
+          "label": "Gateway Pod",
+          "multi": true,
+          "name": "gateway_pod",
+          "options": [],
+          "query": {
+            "datasource": {
+              "name": "${DS_PROMETHEUS}"
+            },
+            "group": "prometheus",
+            "kind": "DataQuery",
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(microgateway_build_info{managed_by=~\"$operator\", namespace=~\"$namespace\", gateway=~\"$gateway_name\"},pod)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            },
+            "version": "v0"
+          },
+          "refresh": "onTimeRangeChanged",
+          "regex": "",
+          "regexApplyTo": "value",
+          "skipUrlSync": false,
+          "sort": "disabled"
+        }
+      }
+    ]
+  }
+}

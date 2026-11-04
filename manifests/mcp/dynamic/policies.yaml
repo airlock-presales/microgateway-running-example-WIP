@@ -1,0 +1,26 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: ContentSecurityPolicy
+metadata:
+  name: mcp-dynamic
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: mcp-dynamic
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: mcp-dynamic-metadata
+  unsecured: {}
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: mcp-dynamic
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: mcp-dynamic
+  envoyHTTPFilterRefs:
+    prepend:
+    - name: mcp-filter

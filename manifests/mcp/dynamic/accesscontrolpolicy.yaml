@@ -1,0 +1,15 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: AccessControlPolicy
+metadata:
+  name: mcp-dynamic
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: mcp-dynamic
+  policies:
+  - authorization:
+      authentication:
+        jwt:
+          jwtRef:
+            name: airlock-iam-dynamic

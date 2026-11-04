@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mcp
+resources:
+- servers.yaml
+- router.yaml
+- route.yaml
+- metadata-route.yaml
+- metadata.yaml
+- metadata-policy.yaml
+- jwks.yaml
+- jwt.yaml
+- accesscontrolpolicy.yaml
+- policies.yaml
+configMapGenerator:
+- name: mcp-demo-server
+  files:
+  - server.py
+- name: mcp-router-config
+  files:
+  - envoy.yaml

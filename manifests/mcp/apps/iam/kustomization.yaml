@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mcp
+resources:
+- service.yaml
+- statefulset.yaml
+configMapGenerator:
+- name: mariadb-jdbc-driver
+  files:
+  - mariadb-java-client.jar=files/mariadb-java-client-3.5.7.jar
+generatorOptions:
+  disableNameSuffixHash: true
