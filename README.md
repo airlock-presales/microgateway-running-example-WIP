@@ -36,7 +36,7 @@ This repository includes hands-on examples to help you deploy and use Airlock Mi
 - [`README-webprotect`](./scenarios/README-webprotect.md): Secure your web application against threats ⚠️ **(Filtering license required)**.
 - [`README-oidc`](./scenarios/README-oidc.md): Integrate upfront authentication and access control using OIDC ⚠️ **(Auth license required)**.
 - [`README-trace`](./scenarios/README-trace.md): Track and visualize request flows to your microservices using OpenTelemetry distributed tracing.
-- [`README-mcp`](./scenarios/README-mcp.md): Authenticate MCP clients with Airlock IAM, protect GitHub MCP, and explore dynamic echo/math routing using the shared gateway and monitoring.
+- [`README-mcp`](./scenarios/README-mcp.md): Authenticate MCP clients with Airlock IAM, protect GitHub MCP, and explore dynamic routing to replicated MCP server pods using the shared gateway and monitoring.
 
 ## 🏁 Quick Start (K8s only)
 

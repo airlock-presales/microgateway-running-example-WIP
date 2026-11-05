@@ -34,10 +34,11 @@ spec:
         - Mcp-Session-Id
         - WWW-Authenticate
         - MCP-Protocol-Version
+        - X-MCP-Backend-Pod
     - type: RequestHeaderModifier
       requestHeaderModifier:
         remove:
         - Authorization
     backendRefs:
-    - name: mcp-router
+    - name: mcp-echo
       port: 8000

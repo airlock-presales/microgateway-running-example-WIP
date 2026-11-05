@@ -7,17 +7,10 @@ import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-SERVER = os.environ.get("MCP_SERVER", "echo")
-TOOLS = {
-    "echo": {"name": "echo", "description": "Return the supplied text.",
-             "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}},
-                             "required": ["text"], "additionalProperties": False}},
-    "math": {"name": "add", "description": "Add two numbers.",
-             "inputSchema": {"type": "object", "properties": {
-                 "a": {"type": "number"}, "b": {"type": "number"}},
-                 "required": ["a", "b"], "additionalProperties": False}},
-}
-TOOL = TOOLS[SERVER]
+POD_NAME = os.environ.get("POD_NAME", "local")
+TOOL = {"name": "echo", "description": "Return the supplied text.",
+        "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}},
+                        "required": ["text"], "additionalProperties": False}}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -26,6 +19,7 @@ class Handler(BaseHTTPRequestHandler):
     def reply(self, status, body=None):
         data = json.dumps(body).encode() if body is not None else b""
         self.send_response(status)
+        self.send_header("X-MCP-Backend-Pod", POD_NAME)
         if body is not None:
             self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(data)))
@@ -66,7 +60,7 @@ class Handler(BaseHTTPRequestHandler):
             response["result"] = {
                 "protocolVersion": requested if requested in ("2025-03-26", "2025-06-18", "2025-11-25") else "2025-06-18",
                 "capabilities": {"tools": {"listChanged": False}},
-                "serverInfo": {"name": "demo-" + SERVER, "version": "1.0.0"}}
+                "serverInfo": {"name": "demo-echo", "version": "1.0.0"}}
         elif method == "ping":
             response["result"] = {}
         elif method == "tools/list":
@@ -76,14 +70,9 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 if params.get("name") != TOOL["name"] or not isinstance(args, dict):
                     raise ValueError("Unknown tool or invalid arguments")
-                if SERVER == "echo":
-                    if set(args) != {"text"} or not isinstance(args["text"], str):
-                        raise ValueError("text must be a string")
-                    result = args["text"]
-                else:
-                    if set(args) != {"a", "b"} or any(type(args[k]) not in (int, float) for k in ("a", "b")):
-                        raise ValueError("a and b must be numbers")
-                    result = str(args["a"] + args["b"])
+                if set(args) != {"text"} or not isinstance(args["text"], str):
+                    raise ValueError("text must be a string")
+                result = args["text"]
                 response["result"] = {"content": [{"type": "text", "text": result}], "isError": False}
             except ValueError as error:
                 response["result"] = {"content": [{"type": "text", "text": str(error)}], "isError": True}

@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: mcp
 resources:
 - servers.yaml
-- router.yaml
 - route.yaml
 - metadata-route.yaml
 - metadata.yaml
@@ -16,6 +15,3 @@ configMapGenerator:
 - name: mcp-demo-server
   files:
   - server.py
-- name: mcp-router-config
-  files:
-  - envoy.yaml

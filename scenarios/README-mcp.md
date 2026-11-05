@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/airlock/microgateway/main/media/Microgateway_Labeled_AlignRight.svg" alt="Microgateway Logo" width="250">
 </p>
 
-Extend the running example with **Airlock IAM** as the authorization server for MCP clients. This guide deploys **IAM with MariaDB**, protects the external **GitHub MCP server**, and adds optional **dynamic routing** across two local MCP servers.
+Extend the running example with **Airlock IAM** as the authorization server for MCP clients. This guide deploys **IAM with MariaDB**, protects the external **GitHub MCP server**, and adds optional **dynamic routing** to replicated pods of a local MCP server.
 
 Follow the stages below to prepare IAM, connect it to the shared gateway, and try both MCP routing examples. This optional scenario needs its own IAM license and application Secrets and is deployed after the general setup.
 
@@ -21,9 +21,9 @@ flowchart LR
     G -->|IAM routes and JWKS| I[Airlock IAM]
     I <-->|User and OAuth data| D[MariaDB]
     G -->|Static route| H[GitHub MCP server]
-    G -->|Dynamic route| R[Envoy MCP router]
-    R --> E[Echo MCP server]
-    R --> M[Math MCP server]
+    G -->|Dynamic route via ClusterIP Service| E[mcp-echo Service]
+    E --> P1[Echo MCP pod 1]
+    E --> P2[Echo MCP pod 2]
 ```
 
 **Numbered request flow** — follow this sequence from top to bottom. It starts after the client has discovered the IAM endpoints and selected its registered client ID.
@@ -81,14 +81,14 @@ Solid arrows are requests/actions; dashed arrows are responses. IAM's login UI m
 
 MariaDB returns data **to IAM** and confirms persisted state. IAM performs authentication and resumes the OAuth flow. The browser callback happens only after IAM returns the authorization-code instruction through Microgateway. Passwords are entered into IAM's browser UI; the MCP client exchanges the returned code using its PKCE verifier.
 
-In this sequence, **MCP backend** means GitHub for the static endpoint or the Envoy companion for the dynamic endpoint. For static routing, Microgateway substitutes the GitHub PAT upstream. For dynamic routing, the companion dispatches a tool call to echo or math and returns its result. Initialize and tool-discovery requests are aggregated across both local backends. Failed authentication or authorization stops the request at the gateway; it is not forwarded to a backend.
+In this sequence, **MCP backend** means GitHub for the static endpoint or an echo pod selected through the `mcp-echo` ClusterIP Service for the dynamic endpoint. For static routing, Microgateway substitutes the GitHub PAT upstream. For dynamic routing, Microgateway uses the Service's available backend endpoints; each replica exposes the same `echo` tool. Failed authentication or authorization stops the request at the gateway; it is not forwarded to a backend.
 
 **How the components work together:**
 
 - **IAM** authenticates the user and issues a signed access token to the MCP client. MariaDB stores IAM users and OAuth data; the signing keystore persists on IAM's own volume.
 - **Microgateway** validates the token's signature, issuer, audience and expiry before allowing MCP traffic.
 - **Static routing** forwards requests to the fixed GitHub MCP backend. A separate GitHub PAT authenticates the gateway's upstream requests; the IAM token is not sent to GitHub.
-- **Dynamic routing** forwards authenticated requests to an Envoy companion. It discovers tools from the echo and math backends and chooses the backend from the called tool name. Aggregation happens in that companion, behind Microgateway.
+- **Dynamic routing** forwards authenticated requests directly to echo MCP pods using a Kubernetes ClusterIP Service and its label selector. Kubernetes tracks ready pods as replicas scale or are replaced; Microgateway updates its backend endpoints without changing the HTTPRoute.
 - **Adminapp** is reachable through Microgateway without gateway authentication or content-security protection. IAM's own administrator login remains enabled.
 
 **IAM login and token requests also pass through Microgateway.** The browser and MCP client use `https://iam-mcp-127-0-0-1.nip.io:8443`; they do not use IAM's internal Service address. “Browser login and PKCE” describes the OAuth flow, not an additional Service or a direct client-to-IAM network connection.
@@ -111,7 +111,7 @@ The application resources use `mcp`; the gateway uses `airlock-gateway`. The sce
 | IAM Loginapp | https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ |
 | Static GitHub MCP | https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp |
 | Static resource metadata | https://github-mcp-iam-127-0-0-1.nip.io:8443/.well-known/oauth-protected-resource/mcp |
-| Dynamic echo/math MCP | https://mcp-iam-127-0-0-1.nip.io:8443/mcp |
+| Dynamic echo MCP | https://mcp-iam-127-0-0-1.nip.io:8443/mcp |
 | Dynamic resource metadata | https://mcp-iam-127-0-0-1.nip.io:8443/.well-known/oauth-protected-resource/mcp |
 
 These names resolve to loopback. Run clients on the workstation exposing Rancher Desktop's gateway ports. For remote access, update hostnames, certificate names, issuer/audience URLs and resource metadata together.
@@ -249,7 +249,7 @@ These are disposable demonstration accounts; do not expose the lab publicly with
 
 In the **Config Editor**, inspect Loginapp's OAuth/OIDC authorization servers:
 
-| Setting | Static GitHub | Dynamic echo/math |
+| Setting | Static GitHub | Dynamic echo |
 |---|---|---|
 | Authorization server ID | `mcp` | `mcp-dynamic` |
 | Public client ID | `mcp-demo` | `mcp-dynamic-demo` |
@@ -258,7 +258,7 @@ In the **Config Editor**, inspect Loginapp's OAuth/OIDC authorization servers:
 | Exact callbacks | `http://localhost:6274/oauth/callback`, `http://127.0.0.1:6274/oauth/callback` | Same |
 | Access-token audience | Static GitHub MCP URL | Dynamic MCP URL |
 
-The dynamic client is prepared in IAM; its backends and public route are deployed in the optional step below. Inspect the signed JWT access-token format, subject/email claims and audience. Microgateway uses access tokens, not ID tokens, as MCP credentials.
+The dynamic client is prepared in IAM; its server pods and public route are deployed in the optional step below. Inspect the signed JWT access-token format, subject/email claims and audience. Microgateway uses access tokens, not ID tokens, as MCP credentials.
 
 Both browser authorization and the client's code exchange traverse Microgateway. The browser's localhost callback returns the authorization code to the MCP client, which exchanges it with its PKCE verifier through the gateway.
 
@@ -304,32 +304,61 @@ It prompts for an IAM test password and verifies PKCE login, MCP initialization,
 
 ## 🔀 Add Dynamic MCP Routing
 
-Inspect [the companion Envoy configuration](../manifests/mcp/dynamic/envoy.yaml). It declares echo and math backends, aggregates their discovered tools and uses a tool-name prefix to choose a destination.
+This example routes directly to a replicated echo MCP server through a Kubernetes **ClusterIP Service**. Its label selector identifies the server pods, and Kubernetes updates the ready endpoints as pods are added or replaced. Every replica exposes the same `echo` tool.
+
+Inspect the resources before deploying:
+
+| Resource | Purpose |
+|---|---|
+| [Echo Deployment and Service](../manifests/mcp/dynamic/servers.yaml) | Two stateless replicas; the Service selects pods labeled `app: mcp-echo` |
+| [Dynamic HTTPRoute](../manifests/mcp/dynamic/route.yaml) | Sends `/mcp` directly to the `mcp-echo` Service on port 8000 |
+| [Access policy](../manifests/mcp/dynamic/accesscontrolpolicy.yaml) | Requires an IAM access token for the dynamic resource |
+| [MCP inspection policy](../manifests/mcp/dynamic/policies.yaml) | Enables MCP parsing inside Microgateway |
 
 ```bash
 kubectl --context "$LAB_CONTEXT" apply --server-side -k manifests/mcp/dynamic
-
 kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
-kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-math --timeout=180s
-kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-router --timeout=180s
+kubectl --context "$LAB_CONTEXT" -n mcp get pods -l app=mcp-echo
+kubectl --context "$LAB_CONTEXT" -n mcp get service mcp-echo
+kubectl --context "$LAB_CONTEXT" -n mcp get endpointslices \
+  -l kubernetes.io/service-name=mcp-echo
 ```
 
-Use the dynamic MCP URL, client ID **`mcp-dynamic-demo`**, no secret and PKCE S256. Its authorization server is `mcp-dynamic`, with an issuer/audience distinct from static GitHub. The gateway authenticates requests before forwarding them to the companion; no GitHub PAT is passed to the local servers.
+Use the dynamic MCP URL, client ID **`mcp-dynamic-demo`**, no secret and PKCE S256. Its authorization server is `mcp-dynamic`, with an issuer/audience distinct from static GitHub. Microgateway authenticates requests before forwarding them directly to an echo pod. The local server has no separate public route.
 
-Discover and call both tools:
-
-| Tool | Example arguments | Expected result |
-|---|---|---|
-| `echo__echo` | `{"text":"Hello through the router"}` | The same text |
-| `math__add` | `{"a":7,"b":5}` | `12` |
-
-Backend destinations are configured, not arbitrary client-selected URLs. Aggregation runs in the companion, not inside the Microgateway process. Neither echo nor math has an unauthenticated public route.
+Discover the `echo` tool and call it with `{"text":"Hello through Microgateway"}`. The result is the same text. The response header `X-MCP-Backend-Pod` identifies the serving replica; the server takes this value from its Kubernetes pod name.
 
 ```bash
 python3 scenarios/scripts/check-mcp.py --dynamic
 ```
 
-The check uses fresh echo/arithmetic inputs, verifies discovery and JWT authentication, dispatches both tools, rejects an unknown tool and tests token isolation from the static endpoint. See [the dynamic client profile](mcp/inspector-dynamic-connection.json).
+The check verifies IAM PKCE, resource discovery, unauthenticated rejection, the `echo` catalog, fresh echo calls, unknown-tool rejection and token isolation from the static endpoint. It prints the backend pod names observed across its requests. See [the dynamic client profile](mcp/inspector-dynamic-connection.json).
+
+### Observe Backend Changes
+
+Scale the server and inspect its endpoints. The HTTPRoute and public URL stay the same:
+
+```bash
+kubectl --context "$LAB_CONTEXT" -n mcp scale deployment/mcp-echo --replicas=3
+kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
+kubectl --context "$LAB_CONTEXT" -n mcp get pods -l app=mcp-echo
+kubectl --context "$LAB_CONTEXT" -n mcp get endpointslices \
+  -l kubernetes.io/service-name=mcp-echo
+python3 scenarios/scripts/check-mcp.py --dynamic --samples 24
+```
+
+Replace the server pods with a rolling restart, then run the check again. The reported backend names should now belong to the replacement pods:
+
+```bash
+kubectl --context "$LAB_CONTEXT" -n mcp rollout restart deployment/mcp-echo
+kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
+kubectl --context "$LAB_CONTEXT" -n mcp get pods -l app=mcp-echo
+python3 scenarios/scripts/check-mcp.py --dynamic --samples 24
+kubectl --context "$LAB_CONTEXT" -n mcp scale deployment/mcp-echo --replicas=2
+kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
+```
+
+This server is stateless, so each request can use any ready replica. Stateful MCP servers need an appropriate session-routing design when replicated.
 
 ## 📊 Inspect MCP Activity
 

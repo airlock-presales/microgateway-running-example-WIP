@@ -19,9 +19,12 @@ import urllib.request
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--username', default='user2')
-parser.add_argument('--dynamic', action='store_true', help='Test the authenticated echo/math aggregator')
+parser.add_argument('--dynamic', action='store_true', help='Test authenticated routing to the echo ClusterIP Service')
 parser.add_argument('--ca', type=Path, default=Path(__file__).resolve().parents[2] / '.local/mcp/iam-mcp-ca.crt')
+parser.add_argument('--samples', type=int, default=16, help='Number of dynamic echo calls to sample backend pods')
 args = parser.parse_args()
+if not 1 <= args.samples <= 1000:
+    parser.error('--samples must be between 1 and 1000')
 password = os.environ.get('IAM_TEST_PASSWORD') or getpass.getpass('IAM test account password: ')
 origin = 'https://iam-mcp-127-0-0-1.nip.io:8443'
 authorization_server = 'mcp-dynamic' if args.dynamic else 'mcp'
@@ -95,6 +98,7 @@ if claims.get('iss') != issuer or claims.get('aud') != resource or claims.get('s
     raise SystemExit('Unexpected access-token claims.')
 print('PASS: IAM authorization-code + S256 PKCE; expected issuer/audience/subject.')
 session = None
+backend_pods = set()
 
 def rpc(method, params=None, rpc_id=None, tool=None):
     global session
@@ -112,6 +116,11 @@ def rpc(method, params=None, rpc_id=None, tool=None):
     with request(resource, json.dumps(payload).encode(), headers) as response:
         if response.status >= 400:
             raise SystemExit(f'MCP {method} failed: HTTP {response.status}')
+        if args.dynamic:
+            pod = response.headers.get('X-MCP-Backend-Pod')
+            if not pod:
+                raise SystemExit('Dynamic MCP response is missing its backend pod identifier.')
+            backend_pods.add(pod)
         session = response.headers.get('Mcp-Session-Id') or session
         if response.status in (202, 204):
             return None
@@ -140,20 +149,18 @@ tools = catalog.get('tools', [])
 print('PASS: MCP tools/list;', len(tools), 'tools returned.')
 if args.dynamic:
     names = {tool['name'] for tool in tools}
-    if names != {'echo__echo', 'math__add'}:
+    if names != {'echo'}:
         raise SystemExit('Unexpected dynamic tool catalog: ' + ', '.join(sorted(names)))
-    marker = 'dynamic-' + secrets.token_hex(10)
-    left, right = secrets.randbelow(1000), secrets.randbelow(1000)
-    cases = [('echo__echo', {'text': marker}, marker),
-             ('math__add', {'a': left, 'b': right}, str(left + right))]
-    for rpc_id, (name, arguments, expected) in enumerate(cases, 3):
-        result = rpc('tools/call', {'name': name, 'arguments': arguments}, rpc_id, name)
+    for rpc_id in range(3, 3 + args.samples):
+        marker = 'dynamic-' + secrets.token_hex(10)
+        result = rpc('tools/call', {'name': 'echo', 'arguments': {'text': marker}}, rpc_id, 'echo')
         actual = [item.get('text') for item in result.get('content', []) if item.get('type') == 'text']
-        if result.get('isError') or actual != [expected]:
-            raise SystemExit('Incorrect dynamic result for ' + name)
-        print('PASS: dynamic dispatch', name, 'returned the expected result.')
+        if result.get('isError') or actual != [marker]:
+            raise SystemExit('Incorrect echo result from the dynamic endpoint.')
+    print('PASS:', args.samples, 'fresh echo calls through the ClusterIP backend.')
+    print('Observed backend pods:', ', '.join(sorted(backend_pods)))
     unknown = {'jsonrpc': '2.0', 'id': 8, 'method': 'tools/call',
-               'params': {'name': 'missing__tool', 'arguments': {}}}
+               'params': {'name': 'unknown_echo_tool', 'arguments': {}}}
     headers = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json',
                'Accept': 'application/json, text/event-stream'}
     if session:
@@ -168,8 +175,8 @@ if args.dynamic:
             except ValueError:
                 failed = False
         if not failed:
-            raise SystemExit('Unknown dynamic tool was not rejected.')
-        print('PASS: unknown backend/tool rejected; HTTP', response.status)
+            raise SystemExit('Unknown echo tool was not rejected.')
+        print('PASS: unknown tool rejected; HTTP', response.status)
     with request('https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp',
                  json.dumps({'jsonrpc':'2.0','id':9,'method':'tools/list'}).encode(), headers) as response:
         if response.status != 401:
