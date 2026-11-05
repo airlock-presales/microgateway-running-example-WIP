@@ -1072,12 +1072,12 @@ spec:
                   targetURIResolver:
                     type: TargetURIResolver
                     id: mcpDemoRedirectTarget
-                    displayName: Redirect to MCP by Default
+                    displayName: Return to MCP Inspector by Default
                     properties:
                       allowedURIs:
                       - valueList:
                         - /(?!/).*
-                      defaultValue: /auth-login/
+                      defaultValue: http://127.0.0.1:6274/
             nonFlowUiSettings:
               type: NonFlowAuthenticationUi
               id: nonFlowUiSettings

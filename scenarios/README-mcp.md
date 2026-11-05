@@ -290,7 +290,7 @@ The launcher supplies the CA to the Inspector process; browser trust must still 
 In Inspector:
 
 1. Select **Streamable HTTP** and enter the static GitHub MCP URL from the access table.
-2. Set client ID **`mcp-demo`**, leave the secret empty and enable **PKCE S256**.
+2. In **Server Settings → OAuth Settings**, set client ID **`mcp-demo`**, leave the secret empty and set scopes to `openid profile email`. Inspector handles PKCE S256 automatically.
 3. Connect, sign in through IAM as `user2`, initialize and discover tools.
 4. Call the read-only `get_me` tool to exercise IAM → Microgateway → GitHub.
 
@@ -324,7 +324,7 @@ kubectl --context "$LAB_CONTEXT" -n mcp get endpointslices \
   -l kubernetes.io/service-name=mcp-echo
 ```
 
-Use the dynamic MCP URL, client ID **`mcp-dynamic-demo`**, no secret and PKCE S256. Its authorization server is `mcp-dynamic`, with an issuer/audience distinct from static GitHub. Microgateway authenticates requests before forwarding them directly to an echo pod. The local server has no separate public route.
+Use the dynamic MCP URL. In this server's **Server Settings → OAuth Settings**, set client ID **`mcp-dynamic-demo`**, leave the secret empty and set scopes to `openid profile email`. Inspector handles PKCE S256 automatically. Its authorization server is `mcp-dynamic`, with an issuer/audience distinct from static GitHub. Microgateway authenticates requests before forwarding them directly to an echo pod. The local server has no separate public route.
 
 Discover the `echo` tool and call it with `{"text":"Hello through Microgateway"}`. The result is the same text. The response header `X-MCP-Backend-Pod` identifies the serving replica; the server takes this value from its Kubernetes pod name.
 

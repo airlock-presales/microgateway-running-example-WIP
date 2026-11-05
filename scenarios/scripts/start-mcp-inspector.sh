@@ -7,5 +7,13 @@ if [[ ! -r "$ca_certificate" ]]; then
   echo "CA certificate missing. Complete the README certificate trust step first." >&2
   exit 1
 fi
+if ! command -v node >/dev/null 2>&1 || ! command -v npx >/dev/null 2>&1; then
+  local_node_bin="$repo_dir/.local/mcp/tools/node/bin"
+  if [[ ! -x "$local_node_bin/node" || ! -x "$local_node_bin/npx" ]]; then
+    echo "Node.js/npm missing. Install the Node.js/npm prerequisite, then retry." >&2
+    exit 1
+  fi
+  export PATH="$local_node_bin:$PATH"
+fi
 export NODE_EXTRA_CA_CERTS="$ca_certificate"
 exec npx @modelcontextprotocol/inspector@2.11.0
