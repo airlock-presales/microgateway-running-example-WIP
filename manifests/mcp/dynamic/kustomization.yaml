@@ -4,9 +4,9 @@ namespace: mcp
 resources:
 - servers.yaml
 - route.yaml
-- metadata-route.yaml
-- metadata.yaml
-- metadata-policy.yaml
+- httproute-oauth-protected-resource.yaml
+- customresponse.yaml
+- customresponsepolicy.yaml
 - jwks.yaml
 - jwt.yaml
 - accesscontrolpolicy.yaml

@@ -146,13 +146,13 @@ chmod 700 .local/mcp
 
 The IAM and MariaDB deployment is based on the [Airlock IAM Kubernetes Example](https://github.com/airlock-presales/iam-kubernetes-example). That repository explains the underlying IAM deployment and database integration. The following steps use the configuration supplied with this MCP scenario; a separate deployment of the IAM example is not required.
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" apply -f manifests/mcp/namespace.yaml
 ```
 
 Place the IAM license at `.local/mcp/iam-license.txt` and the registry Docker configuration at `.local/mcp/iam-dockerconfig.json`. For a new installation:
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" -n mcp create secret generic airlock-iam-license \
   --from-file=license.txt=.local/mcp/iam-license.txt
 
@@ -167,7 +167,7 @@ The license is mounted into IAM as `/home/airlock/iam/license.txt`. The pull Sec
 
 Generate fresh database credentials and IAM crypto values once for a new set of persistent volumes:
 
-```bash
+```bash {"cwd":"../"}
 python3 scenarios/scripts/create-mcp-secrets.py
 kubectl --context "$LAB_CONTEXT" -n mcp apply -f .local/mcp/secrets.yaml
 ```
@@ -188,7 +188,7 @@ The JDBC URL points to `mariadb.mcp.svc.cluster.local`. MariaDB owns the account
 
 ## 🚀 Deploy MariaDB and IAM
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" apply --server-side -k manifests/mcp/apps
 
 kubectl --context "$LAB_CONTEXT" -n mcp rollout status statefulset/mariadb --timeout=180s
@@ -200,7 +200,7 @@ On first startup, MariaDB creates its schema and demo accounts. IAM initializes 
 
 ## 🌐 Publish IAM and Static GitHub MCP
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" apply -k manifests/mcp/gateway
 kubectl --context "$LAB_CONTEXT" -n mcp wait \
   --for=condition=Ready certificate/mcp-gateway-tls --timeout=120s
@@ -225,7 +225,7 @@ Adminapp has no gateway authentication policy or secured content profile. Its ow
 
 Export only the public CA certificate:
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" -n mcp get secret mcp-gateway-tls \
   -o jsonpath='{.data.ca\.crt}' | base64 -d > .local/mcp/iam-mcp-ca.crt
 
@@ -266,7 +266,7 @@ Both browser authorization and the client's code exchange traverse Microgateway.
 
 The main-directory `github_pat.txt` contains a dummy. The helper reads that file by default:
 
-```bash
+```bash {"cwd":"../"}
 python3 scenarios/scripts/set-mcp-github-token.py --context "$LAB_CONTEXT" --set-pat
 ```
 
@@ -281,7 +281,7 @@ The helper patches only the upstream Authorization replacement on `mcp/github-mc
 
 Start Inspector after exporting the CA:
 
-```bash
+```bash {"cwd":"../"}
 bash scenarios/scripts/start-mcp-inspector.sh
 ```
 
@@ -296,7 +296,7 @@ In Inspector:
 
 For a repeatable API/protocol check:
 
-```bash
+```bash {"cwd":"../"}
 python3 scenarios/scripts/check-mcp.py
 ```
 
@@ -315,7 +315,7 @@ Inspect the resources before deploying:
 | [Access policy](../manifests/mcp/dynamic/accesscontrolpolicy.yaml) | Requires an IAM access token for the dynamic resource |
 | [MCP inspection policy](../manifests/mcp/dynamic/policies.yaml) | Enables MCP parsing inside Microgateway |
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" apply --server-side -k manifests/mcp/dynamic
 kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
 kubectl --context "$LAB_CONTEXT" -n mcp get pods -l app=mcp-echo
@@ -328,7 +328,7 @@ Use the dynamic MCP URL. In this server's **Server Settings → OAuth Settings**
 
 Discover the `echo` tool and call it with `{"text":"Hello through Microgateway"}`. The result is the same text. The response header `X-MCP-Backend-Pod` identifies the serving replica; the server takes this value from its Kubernetes pod name.
 
-```bash
+```bash {"cwd":"../"}
 python3 scenarios/scripts/check-mcp.py --dynamic
 ```
 
@@ -338,7 +338,7 @@ The check verifies IAM PKCE, resource discovery, unauthenticated rejection, the 
 
 Scale the server and inspect its endpoints. The HTTPRoute and public URL stay the same:
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" -n mcp scale deployment/mcp-echo --replicas=3
 kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
 kubectl --context "$LAB_CONTEXT" -n mcp get pods -l app=mcp-echo
@@ -349,7 +349,7 @@ python3 scenarios/scripts/check-mcp.py --dynamic --samples 24
 
 Replace the server pods with a rolling restart, then run the check again. The reported backend names should now belong to the replacement pods:
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" -n mcp rollout restart deployment/mcp-echo
 kubectl --context "$LAB_CONTEXT" -n mcp rollout status deployment/mcp-echo --timeout=180s
 kubectl --context "$LAB_CONTEXT" -n mcp get pods -l app=mcp-echo
@@ -364,7 +364,7 @@ This server is stateless, so each request can use any ready replica. Stateful MC
 
 The scenario reuses the general setup's Alloy/Loki, Prometheus and Grafana integrations. Install only the MCP dashboards:
 
-```bash
+```bash {"cwd":"../"}
 kubectl --context "$LAB_CONTEXT" apply -k manifests/mcp/observability
 ```
 
@@ -394,7 +394,7 @@ Changing a Secret does not rotate an existing MariaDB account or the persistent 
 
 For a reviewed repository update to the active instance:
 
-```bash
+```bash {"cwd":"../"}
 python3 scenarios/scripts/activate-mcp-iam-config.py --context "$LAB_CONTEXT" --activate
 ```
 

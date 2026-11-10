@@ -5,17 +5,29 @@ metadata:
 spec:
   statusCode: 200
   content:
-  - contentType: application/json
-    headers:
-    - name: access-control-allow-origin
-      value: '*'
-    - name: access-control-allow-methods
-      value: GET, OPTIONS
-    - name: access-control-allow-headers
-      value: content-type
-    body:
-      value: "{\n  \"resource\": \"https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp\",\n  \"authorization_servers\"\
-        : [\n    \"https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp\"\
-        \n  ],\n  \"scopes_supported\": [\n    \"openid\",\n    \"profile\",\n    \"email\"\n  ],\n  \"\
-        bearer_methods_supported\": [\n    \"header\"\n  ],\n  \"mcp_protocol_version\": \"2025-06-18\"\
-        ,\n  \"resource_type\": \"mcp-server\"\n}"
+    - contentType: application/json
+      headers:
+        - name: access-control-allow-origin
+          value: "*"
+        - name: access-control-allow-methods
+          value: GET, OPTIONS
+        - name: access-control-allow-headers
+          value: content-type
+      body:
+        value: |-
+          {
+            "resource": "https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp",
+            "authorization_servers": [
+              "https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/rest/oauth2/authorization-servers/mcp"
+            ],
+            "scopes_supported": [
+              "openid",
+              "profile",
+              "email"
+            ],
+            "bearer_methods_supported": [
+              "header"
+            ],
+            "mcp_protocol_version": "2025-06-18",
+            "resource_type": "mcp-server"
+          }
