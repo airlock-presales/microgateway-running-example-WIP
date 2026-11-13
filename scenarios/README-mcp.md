@@ -109,6 +109,7 @@ The application resources use `mcp`; the gateway uses `airlock-gateway`. The sce
 |---|---|
 | IAM Adminapp | https://iam-mcp-127-0-0-1.nip.io:8443/auth-admin/ |
 | IAM Loginapp | https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ |
+| IAM Logout | https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ui/app/auth/logout |
 | Static GitHub MCP | https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp |
 | Static resource metadata | https://github-mcp-iam-127-0-0-1.nip.io:8443/.well-known/oauth-protected-resource/mcp |
 | Dynamic echo MCP | https://mcp-iam-127-0-0-1.nip.io:8443/mcp |
@@ -290,9 +291,13 @@ The launcher supplies the CA to the Inspector process; browser trust must still 
 In Inspector:
 
 1. Select **Streamable HTTP** and enter the static GitHub MCP URL from the access table.
-2. In **Server Settings → OAuth Settings**, set client ID **`mcp-demo`**, leave the secret empty and set scopes to `openid profile email`. Inspector handles PKCE S256 automatically.
+2. In **Server Settings → OAuth Settings**, set client ID **`mcp-demo`**, leave **Client Secret** and **Scopes** empty, and uncheck **Request refresh token**. Inspector handles PKCE S256 automatically.
 3. Connect, sign in through IAM as `user2`, initialize and discover tools.
 4. Call the read-only `get_me` tool to exercise IAM → Microgateway → GitHub.
+
+This IAM configuration accepts empty scopes and always grants `profile` and `email`. It does not issue refresh tokens.
+
+To switch users, open [IAM Logout](https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ui/app/auth/logout) in the same browser, then clear the affected server's stored OAuth state and disconnect in Inspector. Reconnect to sign in as the other user. IAM logout ends the browser session; Inspector's access token must also be cleared. Opening the Loginapp root starts login again rather than logging out.
 
 For a repeatable API/protocol check:
 
@@ -324,7 +329,7 @@ kubectl --context "$LAB_CONTEXT" -n mcp get endpointslices \
   -l kubernetes.io/service-name=mcp-echo
 ```
 
-Use the dynamic MCP URL. In this server's **Server Settings → OAuth Settings**, set client ID **`mcp-dynamic-demo`**, leave the secret empty and set scopes to `openid profile email`. Inspector handles PKCE S256 automatically. Its authorization server is `mcp-dynamic`, with an issuer/audience distinct from static GitHub. Microgateway authenticates requests before forwarding them directly to an echo pod. The local server has no separate public route.
+Use the dynamic MCP URL. In this server's **Server Settings → OAuth Settings**, set client ID **`mcp-dynamic-demo`**, leave **Client Secret** and **Scopes** empty, and uncheck **Request refresh token**. Inspector handles PKCE S256 automatically. Its authorization server is `mcp-dynamic`, with an issuer/audience distinct from static GitHub. Microgateway authenticates requests before forwarding them directly to an echo pod. The local server has no separate public route.
 
 Discover the `echo` tool and call it with `{"text":"Hello through Microgateway"}`. The result is the same text. The response header `X-MCP-Backend-Pod` identifies the serving replica; the server takes this value from its Kubernetes pod name.
 
