@@ -26,7 +26,7 @@ flowchart LR
     E --> P2[Echo MCP pod 2]
 ```
 
-**Numbered request flow** — follow this sequence from top to bottom. It starts after the client has discovered the IAM endpoints and selected its registered client ID.
+**Numbered request flow** — follow this sequence from top to bottom. It starts with an MCP request without an access token and shows discovery for a client without cached metadata. The client ID is preconfigured in Inspector as described below.
 
 ```mermaid
 sequenceDiagram
@@ -37,6 +37,18 @@ sequenceDiagram
     participant I as Airlock IAM
     participant D as MariaDB
     participant S as MCP backend
+
+    Note over C,I: Authentication challenge and endpoint discovery
+    C->>G: POST /mcp without an access token
+    G-->>C: 401 Unauthorized with WWW-Authenticate resource_metadata URL
+    C->>G: GET /.well-known/oauth-protected-resource/mcp
+    G->>G: Backendless metadata route generates a local 500
+    G->>G: CustomResponsePolicy replaces it with 200 and metadata JSON
+    G-->>C: 200 OK with MCP resource and IAM authorization server issuer
+    C->>G: GET the IAM issuer's OpenID discovery document
+    G->>I: Forward discovery request to IAM Service
+    I-->>G: 200 OK with authorization and token endpoint metadata
+    G-->>C: 200 OK with IAM discovery JSON
 
     Note over C,D: Sign-in and authorization code
     C->>C: Create state, PKCE verifier and S256 challenge
@@ -62,22 +74,24 @@ sequenceDiagram
     G->>I: Forward token request to IAM Service
     Note over I,D: IAM also reads and updates OAuth state during this exchange
     I->>I: Validate code and PKCE, then issue signed access token
-    I-->>G: Return token response
-    G-->>C: Return token response over HTTPS
+    I-->>G: 200 OK with token response
+    G-->>C: 200 OK with token response over HTTPS
 
-    Note over C,S: Authenticated MCP request after initialization
-    C->>G: Send MCP request with IAM access token
+    Note over C,S: Retry the MCP request with authentication
+    C->>G: Retry MCP request with IAM access token
     opt Signing public keys need fetching or refreshing
         G->>I: Request JWKS through internal IAM Service
         I-->>G: Return signing public keys
     end
     G->>G: Verify signature, issuer, audience, expiry and access policy
     G->>S: Forward an allowed request to the selected backend
-    S-->>G: Return MCP result
-    G-->>C: Return MCP result
+    S-->>G: 200 OK with MCP response
+    G-->>C: 200 OK with MCP response
 ```
 
 Solid arrows are requests/actions; dashed arrows are responses. IAM's login UI makes several page/API requests, grouped here into a login exchange. Database arrows summarize the configured persistence, rather than individual SQL transactions. The callback instruction may be returned through the UI's flow response; the browser then navigates to the client's registered localhost callback.
+
+The initial **401** challenges the client to authenticate; it does not redirect the browser. The **500 → 200** replacement happens only inside Microgateway on the separate metadata route. The client receives **200 with JSON**, reads the IAM issuer, retrieves IAM's discovery document through Microgateway, and then starts browser authorization. IAM is not involved in serving the MCP resource metadata. Subsequent MCP discovery and tool calls also carry the access token and pass through the gateway's validation.
 
 MariaDB returns data **to IAM** and confirms persisted state. IAM performs authentication and resumes the OAuth flow. The browser callback happens only after IAM returns the authorization-code instruction through Microgateway. Passwords are entered into IAM's browser UI; the MCP client exchanges the returned code using its PKCE verifier.
 
