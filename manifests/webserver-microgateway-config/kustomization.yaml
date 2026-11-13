@@ -7,7 +7,6 @@ resources:
 - backendtlspolicy.yaml
 - contentsecuritypolicy.yaml
 - denyrules.yaml
-- webserver-tls-cert.yaml
 - headerrewrites.yaml
 - httproute.yaml
 - identitypropagation-bearer-token.yaml

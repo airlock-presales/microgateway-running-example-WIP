@@ -7,7 +7,7 @@ spec:
   - name: mcp-https
     kind: ListenerSet
     namespace: mcp
-    sectionName: mcp-https
+    sectionName: iam-https
   hostnames:
   - iam-mcp-127-0-0-1.nip.io
   rules:

@@ -224,7 +224,7 @@ kubectl --context "$LAB_CONTEXT" -n mcp get listenerset,httproute
 
 Follow the resources in [gateway configuration](../manifests/mcp/gateway):
 
-1. The **Certificate and ListenerSet** add HTTPS on the existing shared gateway.
+1. The annotated **ListenerSet** adds HTTPS on the existing shared gateway. cert-manager generates `mcp-gateway-tls` from its four listener hostnames, preserving the shared TLS Secret.
 2. **IAM HTTPRoutes** send `/auth-login` and `/auth-admin` to IAM's internal Service.
 3. The **GitHub HTTPRoute** selects the fixed external GitHub MCP service over verified TLS.
 4. **JWKS and JWT** define IAM's public signing keys and the issuer/audience accepted by Microgateway.
