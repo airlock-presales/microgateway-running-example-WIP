@@ -10,5 +10,18 @@
   },
   "kubernetes": {
     "managerFilePatterns": ["/(^|/)(k8s|manifests|deployments)/.+\\.ya?ml$/"]
-  }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["docker.io/mariadb", "docker.io/library/mariadb", "mariadb"],
+      "matchFileNames": ["manifests/mcp/apps/database/statefulset.yaml"],
+      "allowedVersions": "/^11\\.4\\.[0-9]+$/"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["quay.io/airlock/iam"],
+      "enabled": false
+    }
+  ]
 }
