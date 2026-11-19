@@ -4,6 +4,11 @@ kind: ListenerSet
 metadata:
   name: webserver
   namespace: oidc
+  annotations:
+    cert-manager.io/cluster-issuer: cluster-ca-issuer
+    cert-manager.io/common-name: webserver-127-0-0-1.nip.io
+    cert-manager.io/private-key-size: "4096"
+    cert-manager.io/usages: "server auth,digital signature"
 spec:
   parentRef:
     group: gateway.networking.k8s.io

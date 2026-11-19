@@ -4,6 +4,152 @@ metadata:
   name: gateway-telemetry
   namespace: airlock-gateway
 spec:
+  # MCP scenario: access logs with parsed MCP methods and tool names.
+  logging:
+    accessLog:
+      format:
+        json:
+          "@timestamp": "%START_TIME(%Y-%m-%dT%T.%3f%z)%"
+          ecs:
+            version: "8.5"
+          log:
+            logger: "access"
+            level: "info"
+          event:
+            kind: "event"
+            category: ["web"]
+            type: "%EVENT_TYPE%"
+            module: "envoy"
+            dataset: "envoy.access"
+            outcome: "success"
+            start: "%START_TIME(%Y-%m-%dT%T.%3f%z)%"
+            end: "%END_TIME(%Y-%m-%dT%T.%3f%z)%"
+            duration: "%DURATION_IN_NANOSECONDS%"
+          airlock:
+            access_control: "%ACCESS_CONTROL%"
+            actions:
+              block: "%BLOCK_ACTION%"
+              header_rewrites: "%HEADER_REWRITES%"
+              log_only: "%LOG_ONLY_ACTIONS%"
+            http:
+              request:
+                accept_language: "%REQ(ACCEPT-LANGUAGE):100%"
+                correlation_id: "%DYNAMIC_METADATA(com.airlock.microgateway.telemetry:correlation_id)%"
+              response:
+                redirect_url: "%RESP(LOCATION):1000%"
+              session:
+                id: "%SESSION_ID%"
+            icap: "%ICAP_INFO%"
+            log_correlation: "%LOG_CORRELATION%"
+            route:
+              name: "%METADATA(ROUTE:com.airlock.microgateway.route:name)%"
+              namespace: "%METADATA(ROUTE:com.airlock.microgateway.route:namespace)%"
+              kind: "%METADATA(ROUTE:com.airlock.microgateway.route:kind)%"
+            summary:
+              action: "%SUMMARY_ACTION%"
+              details: "%RESPONSE_CODE_DETAILS%"
+              flags: "%RESPONSE_FLAGS%"
+            upstream:
+              destination:
+                ip: "%UPSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%"
+                port: "%UPSTREAM_REMOTE_PORT%"
+              http:
+                status_code: "%UPSTREAM_RESPONSE_CODE%"
+                version: "%UPSTREAM_HTTP_VERSION%"
+                attempt_count: "%UPSTREAM_REQUEST_ATTEMPT_COUNT%"
+              tls:
+                cipher: "%UPSTREAM_TLS_CIPHER%"
+                group: "%UPSTREAM_TLS_GROUP%"
+                version: "%CEL(upstream.tls_version == 'TLSv1.3' ? 1.3 : upstream.tls_version == 'TLSv1.2' ? 1.2 : upstream.tls_version == 'TLSv1.1' ? 1.1 : (upstream.tls_version == 'TLSv1' || upstream.tls_version == 'TLSv1.0') ? 1.0 : null)%"
+                version_protocol: "%CEL((upstream.tls_version == 'TLSv1.3' || upstream.tls_version == 'TLSv1.2' || upstream.tls_version == 'TLSv1.1' || upstream.tls_version == 'TLSv1' || upstream.tls_version == 'TLSv1.0') ? 'tls' : null)%"
+                peer:
+                  hash:
+                    sha256: "%CEL(upstream.sha256_peer_certificate_digest)%"
+                  issuer: "%UPSTREAM_PEER_ISSUER%"
+                  subject: "%UPSTREAM_PEER_SUBJECT%"
+          destination:
+            ip: "%DOWNSTREAM_LOCAL_ADDRESS_WITHOUT_PORT%"
+            port: "%DOWNSTREAM_LOCAL_PORT%"
+          geo:
+            city_name: "%GEO(city_name)%"
+            region_iso_code: "%GEO(region_iso_code)%"
+            country_iso_code: "%GEO(country_iso_code)%"
+          http:
+            request:
+              body:
+                bytes: "%BYTES_RECEIVED%"
+              bytes: "%REQUEST_HEADERS_AND_BODY_BYTES%"
+              id: "%STREAM_ID%"
+              method: "%REQ(:METHOD):100%"
+              mime_type: "%REQ_MIME_TYPE:500%"
+              referrer: "%REQ(REFERER):1000%"
+            response:
+              body:
+                bytes: "%BYTES_SENT%"
+              bytes: "%RESPONSE_HEADERS_AND_BODY_BYTES%"
+              mime_type: "%RESP_MIME_TYPE:500%"
+              status_code: "%RESPONSE_CODE%"
+            version: "%HTTP_VERSION%"
+          network:
+            forwarded_ip: "%DOWNSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%"
+          observer:
+            product: "Airlock Microgateway"
+            type: "waap"
+            vendor: "Ergon Informatik AG"
+            version: "%ENVIRONMENT(ENGINE_VERSION)%"
+          source:
+            ip: "%DOWNSTREAM_DIRECT_REMOTE_ADDRESS_WITHOUT_PORT%"
+            port: "%DOWNSTREAM_DIRECT_REMOTE_PORT%"
+          tls:
+            cipher: "%DOWNSTREAM_TLS_CIPHER%"
+            group: "%DOWNSTREAM_TLS_GROUP%"
+            client:
+              hash:
+                sha256: "%DOWNSTREAM_PEER_FINGERPRINT_256%"
+              issuer: "%DOWNSTREAM_PEER_ISSUER%"
+              ja3: "%TLS_JA3_FINGERPRINT%"
+              ja4: "%TLS_JA4_FINGERPRINT%"
+              server_name: "%REQUESTED_SERVER_NAME%"
+              subject: "%DOWNSTREAM_PEER_SUBJECT%"
+            version: "%CEL(connection.tls_version == 'TLSv1.3' ? 1.3 : connection.tls_version == 'TLSv1.2' ? 1.2 : connection.tls_version == 'TLSv1.1' ? 1.1 : (connection.tls_version == 'TLSv1' || connection.tls_version == 'TLSv1.0') ? 1.0 : null)%"
+            version_protocol: "%CEL((connection.tls_version == 'TLSv1.3' || connection.tls_version == 'TLSv1.2' || connection.tls_version == 'TLSv1.1' || connection.tls_version == 'TLSv1' || connection.tls_version == 'TLSv1.0') ? 'tls' : null)%"
+          url:
+            domain: "%HTTP_HOST:500%"
+            path: "%REQ_WITHOUT_QUERY(:PATH):1000%"
+            query: "%REQ_QUERY(:PATH):1000%"
+          user_agent:
+            original: "%REQ(USER-AGENT):500%"
+          mcp:
+            method: "%DYNAMIC_METADATA(envoy.filters.http.mcp:method)%"
+            id: "%DYNAMIC_METADATA(envoy.filters.http.mcp:id)%"
+            mcp_group: "%DYNAMIC_METADATA(envoy.filters.http.mcp:mcp_group)%"
+            body_exceeded_limit: "%DYNAMIC_METADATA(envoy.filters.http.mcp:is_exceeding_limit)%"
+
+            # tools/call
+            tool_name: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:name)%"
+
+            # resources/read, resources/subscribe, resources/unsubscribe
+            resource_uri: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:uri)%"
+
+            # prompts/get
+            # Note: `name` is the same metadata path as tools/call's name.
+            prompt_name: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:name)%"
+
+            # pagination: tools/list, resources/list, prompts/list,
+            # resources/templates/list
+            cursor: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:cursor)%"
+
+            # logging/setLevel
+            logging_level: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:level)%"
+
+            # completion/complete
+            completion_ref: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:ref)%"
+
+            # MCP _meta
+            traceparent: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:_meta:traceparent)%"
+            tracestate: "%DYNAMIC_METADATA(envoy.filters.http.mcp:params:_meta:tracestate)%"
+
+  # Tracing scenario: export OpenTelemetry spans to Alloy.
   tracing:
     provider:
       openTelemetry:

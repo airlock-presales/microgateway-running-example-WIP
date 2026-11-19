@@ -1,3 +1,11 @@
 ---
 crds:
   enabled: true
+
+# Gateway API CRDs (including ListenerSet, v1.5+) must exist before startup.
+config:
+  gatewayAPI:
+    enabled: true
+    enableListenerSet: true
+  featureGates:
+    ListenerSets: true

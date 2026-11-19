@@ -1,0 +1,230 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: airlock-iam
+  namespace: mcp
+spec:
+  serviceName: airlock-iam
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: airlock-iam
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: airlock-iam
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+      - name: initialize-instance
+        image: quay.io/airlock/iam:8.7.0
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          set -eu
+          install_config=false
+          if [ ! -d /home/airlock/iam/instances/auth ]; then
+            /opt/airlock-iam/bin/iam init --instance auth --analytics LICENSE_DATA
+            install_config=true
+          fi
+          mkdir -p /home/airlock/iam/instances/auth/keystores
+          if [ ! -f /home/airlock/iam/instances/auth/keystores/oidc-signing.p12 ]; then
+            /opt/airlock-iam/jre/bin/keytool -genkeypair \
+              -alias mcp \
+              -keyalg RSA \
+              -keysize 3072 \
+              -sigalg SHA256withRSA \
+              -dname "CN=MCP OIDC signing,O=Airlock Demo,C=CH" \
+              -validity 3650 \
+              -storetype PKCS12 \
+              -keystore /home/airlock/iam/instances/auth/keystores/oidc-signing.p12 \
+              -storepass "$IAM_OIDC_KEYSTORE_PASSWORD" \
+              -keypass "$IAM_OIDC_KEYSTORE_PASSWORD"
+          fi
+          if [ "$install_config" = true ]; then
+            cp /etc/iam-bootstrap/iam-config.yaml /home/airlock/iam/instances/auth/iam-config.yaml
+            chmod 600 /home/airlock/iam/instances/auth/iam-config.yaml
+          fi
+        env:
+        - name: IAM_OIDC_KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: iam-oidc-secrets
+              key: keystore-password
+        volumeMounts:
+        - name: iam-data
+          mountPath: /home/airlock/iam
+        - name: iam-license
+          mountPath: /home/airlock/iam/license.txt
+          subPath: license.txt
+          readOnly: true
+        - name: iam-bootstrap
+          mountPath: /etc/iam-bootstrap
+          readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      containers:
+      - name: airlock-iam
+        image: quay.io/airlock/iam:8.7.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: IAM_DB_DRIVER_CLASS
+          value: org.mariadb.jdbc.Driver
+        - name: IAM_DB_URL
+          value: jdbc:mariadb://mariadb.mcp.svc.cluster.local:3306/airlockiam
+        - name: IAM_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-credentials
+              key: username
+        - name: IAM_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-credentials
+              key: password
+        - name: IAM_OIDC_KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: iam-oidc-secrets
+              key: keystore-password
+        - name: IAM_MODULES
+          value: adminapp,loginapp
+        - name: IAM_WEB_SERVER_CONNECTORS
+          value: http,https
+        - name: IAM_JAVA_OPTS
+          value: -XX:MaxRAMPercentage=70
+        - name: TZ
+          value: Europe/Berlin
+        - name: IAM_CONFIG_FORMAT
+          value: yaml
+        - name: IAM_LOGIN_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iam-oidc-secrets
+              key: login-encryption-key
+        - name: IAM_LOGIN_HMAC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iam-oidc-secrets
+              key: login-hmac-key
+        - name: IAM_DEVICE_COOKIE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iam-oidc-secrets
+              key: device-cookie-key
+        - name: IAM_SERVICE_CONTAINER_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: iam-oidc-secrets
+              key: service-container-secret
+        - name: IAM_CONFIG_EDITOR_SHOW_VARIABLES
+          value: 'true'
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: https
+          containerPort: 8443
+        volumeMounts:
+        - name: iam-data
+          mountPath: /home/airlock/iam
+        - name: jdbc-driver
+          mountPath: /home/airlock/iam/instances/common/libs/mariadb-java-client.jar
+          subPath: mariadb-java-client.jar
+        - name: iam-license
+          mountPath: /home/airlock/iam/license.txt
+          subPath: license.txt
+          readOnly: true
+        - name: iam-sensitive-files
+          mountPath: /etc/iam-secrets/keystore-password
+          subPath: keystore-password
+          readOnly: true
+        - name: iam-sensitive-files
+          mountPath: /etc/iam-secrets/login-encryption-key
+          subPath: login-encryption-key
+          readOnly: true
+        - name: iam-sensitive-files
+          mountPath: /etc/iam-secrets/login-hmac-key
+          subPath: login-hmac-key
+          readOnly: true
+        - name: iam-sensitive-files
+          mountPath: /etc/iam-secrets/device-cookie-key
+          subPath: device-cookie-key
+          readOnly: true
+        - name: iam-sensitive-files
+          mountPath: /etc/iam-secrets/service-container-secret
+          subPath: service-container-secret
+          readOnly: true
+        - name: iam-database-password
+          mountPath: /etc/iam-database-secret/password
+          subPath: password
+          readOnly: true
+        readinessProbe:
+          exec:
+            command:
+            - curl
+            - --fail
+            - --silent
+            - --output
+            - /dev/null
+            - http://127.0.0.1:8080/health/ready
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 12
+          timeoutSeconds: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+          limits:
+            memory: 4Gi
+      imagePullSecrets:
+      - name: iam-pull-secret
+      volumes:
+      - name: jdbc-driver
+        configMap:
+          name: mariadb-jdbc-driver
+      - name: iam-license
+        secret:
+          secretName: airlock-iam-license
+      - name: iam-bootstrap
+        configMap:
+          name: iam-mcp-config
+      - name: iam-sensitive-files
+        secret:
+          secretName: iam-oidc-secrets
+          defaultMode: 288
+      - name: iam-database-password
+        secret:
+          secretName: mariadb-credentials
+          defaultMode: 288
+          items:
+          - key: password
+            path: password
+  volumeClaimTemplates:
+  - metadata:
+      name: iam-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi

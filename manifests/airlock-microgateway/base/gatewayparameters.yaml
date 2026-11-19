@@ -16,6 +16,10 @@ spec:
       placement: {}
       engineContainer: {}
       automountServiceAccountToken: false
+  features:
+    # MCP: verified-TLS external GitHub backend and MCP inspection filter.
+    externalNameServicesAllowed: true
+    envoyExtensionPolicyEnabled: true
   defaults:
     contentSecurity:
       secured: {} # Enables WAAP processing in general with the default configuration of filter and mutation rules.

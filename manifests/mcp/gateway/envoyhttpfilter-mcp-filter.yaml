@@ -1,0 +1,87 @@
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: EnvoyHTTPFilter
+metadata:
+  name: mcp-filter
+spec:
+  value:
+    name: envoy.filters.http.mcp
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.filters.http.mcp.v3.Mcp
+      traffic_mode: PASS_THROUGH # REJECT_NO_MCP to reject requests not following MCP spec
+      reject_duplicate_keys: true
+      propagate_trace_context: {} # traceparent and tracestate headers
+
+      parser_config:
+        group_metadata_key: mcp_group
+
+        methods:
+          # Lifecycle
+          - method: initialize
+            group: lifecycle
+            extraction_rules:
+              - path: params.protocolVersion
+              - path: params.capabilities
+              - path: params.clientInfo
+
+          # Tools
+          - method: tools/list
+            group: tool
+            extraction_rules:
+              - path: params.cursor
+
+          - method: tools/call
+            group: tool
+            extraction_rules:
+              - path: params.name
+
+          # Resources
+          - method: resources/list
+            group: resource
+            extraction_rules:
+              - path: params.cursor
+
+          - method: resources/templates/list
+            group: resource
+            extraction_rules:
+              - path: params.cursor
+
+          - method: resources/read
+            group: resource
+            extraction_rules:
+              - path: params.uri
+
+          - method: resources/subscribe
+            group: resource
+            extraction_rules:
+              - path: params.uri
+
+          - method: resources/unsubscribe
+            group: resource
+            extraction_rules:
+              - path: params.uri
+
+          # Prompts
+          - method: prompts/list
+            group: prompt
+            extraction_rules:
+              - path: params.cursor
+
+          - method: prompts/get
+            group: prompt
+            extraction_rules:
+              - path: params.name
+
+          # Logging
+          - method: logging/setLevel
+            group: logging
+            extraction_rules:
+              - path: params.level
+
+          # Completion
+          - method: completion/complete
+            group: completion
+            extraction_rules:
+              - path: params.ref
+              - path: params.argument
+              - path: params.context
