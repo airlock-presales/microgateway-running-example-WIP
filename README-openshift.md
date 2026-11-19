@@ -190,7 +190,7 @@ Alloy publishes both `service` and `service_name` labels. The latter is required
 If you have an OpenShift version <= 4.18 please install the GatewayAPI CRDs manually.
 
 ```bash
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.7.0/standard-install.yaml
 ```
 
 ### Airlock Microgateway configure the after it was installed via OperatorHub

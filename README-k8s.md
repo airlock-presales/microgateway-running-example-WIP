@@ -65,12 +65,12 @@ In order to be able to use GatewayAPI you have to deploy the CRDs in advance.
 
 ```bash
 # No Gateway API CRDs or not managed via HELM
-kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.7.0/standard-install.yaml
 ```
 
 ```bash
 # Gateway API predeployed by different HELM package like Traefik in Rancher Desktop
-kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml
+kubectl apply --server-side --force-conflicts -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.7.0/standard-install.yaml
 ```
 
 ## 📜 Deploy Cert-Manager
