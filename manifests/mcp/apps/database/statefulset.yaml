@@ -17,7 +17,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: mariadb
-        image: docker.io/mariadb:11.4.4
+        image: docker.io/mariadb:13.0.2
         env:
         - name: MARIADB_ROOT_PASSWORD
           valueFrom:
