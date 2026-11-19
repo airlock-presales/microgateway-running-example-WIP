@@ -21,7 +21,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: server
-          image: python:3.13.12-alpine3.23
+          image: python:3.15.2-alpine3.23
           command: [python, -u, -B, /app/server.py]
           env:
             - name: POD_NAME
