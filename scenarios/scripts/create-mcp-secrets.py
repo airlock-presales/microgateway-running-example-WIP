@@ -5,6 +5,8 @@ import json
 import os
 from pathlib import Path
 import secrets
+import stat
+import tempfile
 
 root = Path(__file__).resolve().parents[2]
 folder = root / '.local/mcp'
@@ -29,9 +31,18 @@ data = {'apiVersion': 'v1', 'kind': 'List', 'items': [
         'device-cookie-key': random_key(), 'service-container-secret': secrets.token_urlsafe(32)})]}
 
 path = folder / 'secrets.yaml'
-# Exclusive creation protects credentials belonging to existing PVCs.
-fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-with os.fdopen(fd, 'w') as output:
-    json.dump(data, output, indent=2)
-    output.write('\n')
-print('Prepared .local/mcp/secrets.yaml (mode 600). Nothing deployed. Keep these values with the MCP PVCs.')
+# Publish the complete file without replacing credentials used by existing PVCs.
+with tempfile.TemporaryDirectory(dir=folder) as staging:
+    staged_path = Path(staging) / path.name
+    fd = os.open(staged_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(fd, 'w') as output:
+        json.dump(data, output, indent=2)
+        output.write('\n')
+    try:
+        os.link(staged_path, path)
+    except FileExistsError:
+        if not stat.S_ISREG(path.lstat().st_mode):
+            raise SystemExit('Cannot reuse .local/mcp/secrets.yaml because it is not a regular file.')
+        print('Reused .local/mcp/secrets.yaml. Nothing deployed.')
+    else:
+        print('Prepared .local/mcp/secrets.yaml (mode 600). Nothing deployed. Keep these values with the MCP PVCs.')

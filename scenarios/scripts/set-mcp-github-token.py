@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read a PAT file and update only the MCP route; explicit context/action flags required."""
+"""Read a PAT file and update only the MCP GitHub route."""
 import argparse
 import json
 import os
@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--context', required=True)
+parser.add_argument('--context', help='Kubernetes context (default: current kubectl context)')
 parser.add_argument('--set-pat', action='store_true', required=True,
                     help='Explicitly patch only the MCP GitHub route')
 parser.add_argument('--token-file', type=Path,
@@ -22,7 +22,18 @@ except (OSError, UnicodeError):
 if not token or any(c.isspace() for c in token):
     parser.error('The token file must contain one nonempty token without internal whitespace.')
 
-command = ['kubectl', '--context', args.context, '-n', 'mcp']
+context = args.context
+if context is None:
+    try:
+        current = subprocess.run(['kubectl', 'config', 'current-context'],
+                                 capture_output=True, text=True)
+    except FileNotFoundError:
+        parser.error('kubectl was not found on PATH.')
+    context = current.stdout.strip()
+    if current.returncode or not context:
+        parser.error('No current kubectl context. Select one or pass --context.')
+
+command = ['kubectl', '--context', context, '-n', 'mcp']
 result = subprocess.run(command + ['get', 'httproute', 'github-mcp', '-o', 'json'],
                         check=True, capture_output=True, text=True)
 route = json.loads(result.stdout)
