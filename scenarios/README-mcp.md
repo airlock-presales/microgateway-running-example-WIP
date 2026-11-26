@@ -123,7 +123,7 @@ The application resources use `mcp`; the gateway uses `airlock-gateway`. The sce
 |---|---|
 | IAM Adminapp | https://iam-mcp-127-0-0-1.nip.io:8443/auth-admin/ |
 | IAM Loginapp | https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ |
-| IAM Logout | https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ui/app/auth/logout |
+| IAM Logout | https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/logout |
 | Static GitHub MCP | https://github-mcp-iam-127-0-0-1.nip.io:8443/mcp |
 | Static resource metadata | https://github-mcp-iam-127-0-0-1.nip.io:8443/.well-known/oauth-protected-resource/mcp |
 | Dynamic echo MCP | https://mcp-iam-127-0-0-1.nip.io:8443/mcp |
@@ -310,7 +310,7 @@ In Inspector:
 
 This IAM configuration accepts empty scopes and always grants `profile` and `email`. It does not issue refresh tokens.
 
-To switch users, open [IAM Logout](https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/ui/app/auth/logout) in the same browser, then clear the affected server's stored OAuth state and disconnect in Inspector. Reconnect to sign in as the other user. IAM logout ends the browser session; Inspector's access token must also be cleared. Opening the Loginapp root starts login again rather than logging out.
+To switch users, open [IAM Logout](https://iam-mcp-127-0-0-1.nip.io:8443/auth-login/logout) in the same browser, then clear the affected server's stored OAuth state and disconnect in Inspector. Reconnect to sign in as the other user. IAM logout ends the browser session; Inspector's access token must also be cleared. Opening the Loginapp root starts login again rather than logging out.
 
 For a repeatable API/protocol check:
 
