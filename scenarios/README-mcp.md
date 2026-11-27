@@ -28,6 +28,10 @@ flowchart LR
 
 **Numbered request flow** — follow this sequence from top to bottom. It starts with an MCP request without an access token and shows discovery for a client without cached metadata. The client ID is preconfigured in Inspector as described below.
 
+<p align="center">
+  <img src="media/Airbert’s_Token_Exchange_Adventure.gif" alt="Animation">
+</p>
+
 ```mermaid
 sequenceDiagram
     autonumber
